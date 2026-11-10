@@ -1,0 +1,37 @@
+[
+  {
+    "question": "Which product SKU sold the most units?",
+    "sql_generated": "SELECT SKU_Coded, SUM(Qty_Sold) AS Total_Qty FROM sales GROUP BY SKU_Coded ORDER BY Total_Qty DESC LIMIT 1",
+    "sql_result": " SKU_Coded  Total_Qty\n   6200700       12.0"
+  },
+  {
+    "question": "What was the total sales value across all stores?",
+    "sql_generated": "SELECT SUM(Total_Sale_Value) AS Total_Sales FROM sales",
+    "sql_result": " Total_Sales\n       122.5"
+  },
+  {
+    "question": "Which store had the highest total sales value?",
+    "sql_generated": "SELECT Store_Number, SUM(Total_Sale_Value) AS Total_Sales FROM sales GROUP BY Store_Number ORDER BY Total_Sales DESC LIMIT 1",
+    "sql_result": " Store_Number  Total_Sales\n         2970         64.0"
+  },
+  {
+    "question": "Make a bar chart of total sales value by store",
+    "sql_generated": "SELECT Store_Number, SUM(Total_Sale_Value) AS Total_Sales FROM sales GROUP BY Store_Number ORDER BY Store_Number",
+    "sql_result": " Store_Number  Total_Sales\n          880         14.0\n         1320         44.5\n         2970         64.0"
+  },
+  {
+    "question": "What share of transactions had a promotion?",
+    "sql_generated": "SELECT 100.0 * SUM(On_Promo) / COUNT(*) AS Promotion_Percentage FROM sales",
+    "sql_result": " Promotion_Percentage\n                 30.0"
+  },
+  {
+    "question": "What was the average value of a transaction?",
+    "sql_generated": "SELECT AVG(Total_Sale_Value) AS Average_Sale FROM sales",
+    "sql_result": " Average_Sale\n        12.25"
+  },
+  {
+    "question": "Draw a line chart of monthly sales value in 2021",
+    "sql_generated": "SELECT MONTH(Sold_Date) AS Month, SUM(Total_Sale_Value) AS Total_Sales FROM sales WHERE YEAR(Sold_Date) = 2021 GROUP BY Month ORDER BY Month",
+    "sql_result": " Month  Total_Sales\n    11         78.5\n    12         44.0"
+  }
+]

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-evals"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "arize-phoenix",
+  "duckdb",
+  "matplotlib",
+  "openai",
+  "openinference-instrumentation-openai",
+  "pandas",
+  "pyarrow",
+  "pydantic",
+  "python-dotenv",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["agent_evals*"]
+
+[tool.pytest.ini_options]
+markers = ["live: requires OPENAI_API_KEY and network access"]

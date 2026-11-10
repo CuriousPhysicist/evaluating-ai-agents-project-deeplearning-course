@@ -1,0 +1,20 @@
+[
+  {
+    "question": "What was the mean number of units per transaction?"
+  },
+  {
+    "question": "On average, how many units are in one transaction?"
+  },
+  {
+    "question": "How many items does one sale contain on average?"
+  },
+  {
+    "question": "Work out the usual quantity in a transaction"
+  },
+  {
+    "question": "How many units does a customer buy per transaction on average?"
+  },
+  {
+    "question": "What's the average basket size in units?"
+  }
+]

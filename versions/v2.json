@@ -1,0 +1,6 @@
+{
+  "name": "v2",
+  "overrides": {
+    "sql_generation_prompt": "Generate an SQL query based on a prompt. Do not reply with anything besides the SQL query.\nThink before you respond."
+  }
+}

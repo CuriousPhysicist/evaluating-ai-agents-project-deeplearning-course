@@ -1,5 +1,9 @@
 # Local environment settings and secrets
 .env
 .env.*
-
-# ...
+.venv/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+results/*.json
+results/phoenix.log

@@ -1,0 +1,1 @@
+"""Evaluation harness for a tool-using sales assistant."""
