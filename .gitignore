@@ -1,0 +1,5 @@
+# Local environment settings and secrets
+.env
+.env.*
+
+# ...
