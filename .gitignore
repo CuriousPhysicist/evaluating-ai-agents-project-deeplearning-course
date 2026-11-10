@@ -2,8 +2,14 @@
 .env
 .env.*
 .venv/
+
+# Python packaging
 *.egg-info/
+
+# cache and build directories
 __pycache__/
 .pytest_cache/
+
+# test results
 results/*.json
 results/phoenix.log
