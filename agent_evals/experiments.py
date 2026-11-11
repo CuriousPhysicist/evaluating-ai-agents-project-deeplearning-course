@@ -27,6 +27,11 @@ EVALUATOR_NAMES = [
 
 
 def _latest_dataset(client: Client, prefix: str):
+    """Return the newest Phoenix dataset whose name begins with the given prefix.
+
+    Raises:
+        RuntimeError: If no matching dataset is found.
+    """
     matches = [dataset for dataset in client.datasets.list() if dataset["name"].startswith(prefix)]
     if not matches:
         raise RuntimeError(f"No Phoenix dataset found with prefix {prefix!r}; run setup first")
@@ -35,6 +40,12 @@ def _latest_dataset(client: Client, prefix: str):
 
 
 def _write_result(root: Path, version: str, result: dict[str, Any]) -> None:
+    """Write a version's evaluation result to the results directory and track ordering.
+
+    The JSON payload is saved under results/<version>.json and the
+    evaluation_order.json file is updated so the results can be compared in the
+    same sequence they were produced.
+    """
     (root / "results").mkdir(exist_ok=True)
     target = root / "results" / f"{version}.json"
     target.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
@@ -52,6 +63,12 @@ def evaluate_version(
     root: Path | None = None,
     provider: ChatProvider | None = None,
 ) -> dict[str, Any]:
+    """Run the full evaluation pipeline for a single agent version.
+
+    This loads the relevant dataset(s), executes the agent across all benchmark
+    questions, scores overall and convergence metrics, writes the results to disk,
+    and returns the aggregated summary for later comparison.
+    """
     root = root or Path(__file__).resolve().parents[1]
     provider = provider or OpenAIProvider()
     version_settings = AgentSettings.load(version)
@@ -63,23 +80,27 @@ def evaluate_version(
     records: dict[str, dict[str, Any]] = {}
 
     def task(input: dict[str, Any]) -> dict[str, Any]:
+        """Run the agent for one question and store the resulting record by prompt."""
         question = str(input["question"])
         record = run_agent(question, version, provider=provider)
         records[question] = record
         return record
 
     def router_eval(output: dict[str, Any], input: dict[str, Any]) -> float:
+        """Score the model's tool-calling behavior and save the result for the current question."""
         judgment = function_calling_evaluation(output, provider, judge_model, tool_definitions)
         value = judgment["score"]
         overall_scores.setdefault(input["question"], {})["function_calling_eval"] = value
         return judgment
 
     def sql_eval(output: dict[str, Any], expected: dict[str, Any], input: dict[str, Any]) -> float:
+        """Evaluate whether the SQL output matches the expected result and log the score."""
         value = evaluate_sql_result(output, str(expected.get("sql_result", "")))
         overall_scores.setdefault(input["question"], {})["evaluate_sql_result"] = value
         return value
 
     def answer_eval(output: dict[str, Any], input: dict[str, Any]) -> list[dict[str, Any]]:
+        """Score the final answer quality and merge those judgments into the overall result map."""
         judgments = evaluate_final_answer_details(output, provider, judge_model)
         overall_scores.setdefault(input["question"], {}).update(
             {name: judgment["score"] for name, judgment in judgments.items()}
@@ -90,6 +111,7 @@ def evaluate_version(
         ]
 
     def code_eval(output: dict[str, Any], input: dict[str, Any]) -> float:
+        """Check whether the generated code executes successfully and save the result."""
         value = code_is_runnable(output)
         overall_scores.setdefault(input["question"], {})["code_is_runnable"] = value
         return value
@@ -126,6 +148,7 @@ def evaluate_version(
     path_records: dict[str, dict[str, Any]] = {}
 
     def path_task(input: dict[str, Any]) -> dict[str, Any]:
+        """Run the agent on a convergence question and cache the recorded path data."""
         question = str(input["question"])
         record = run_agent(question, version, provider=provider)
         path_records[question] = record
@@ -142,6 +165,7 @@ def evaluate_version(
     optimal, path_scores, path_mean = convergence_score(lengths)
 
     def path_eval(output: dict[str, Any]) -> float:
+        """Convert a recovered path length into a convergence score relative to the optimal path."""
         length = output.get("path_length")
         return float(optimal / length) if optimal is not None and length else 0.0
 
@@ -186,6 +210,7 @@ def evaluate_version(
 
 
 def print_comparison(root: Path) -> None:
+    """Print a summary table comparing all saved evaluation results by version."""
     results_dir = root / "results"
     order_path = results_dir / "evaluation_order.json"
     order = json.loads(order_path.read_text(encoding="utf-8")) if order_path.exists() else []
