@@ -1,3 +1,4 @@
+# Import block:
 from __future__ import annotations
 
 import argparse
@@ -7,6 +8,7 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 
+# Definition of constants and global variables:
 ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_ROWS = [
     (1320, 6200700, "2021-11-01", 2, 10.00, 1),
@@ -121,6 +123,6 @@ def main() -> None:
 
         print_comparison(ROOT)
 
-
+# Entry point for the script: guard to ensure that the main function is called when the script is executed directly.
 if __name__ == "__main__":
     main()
