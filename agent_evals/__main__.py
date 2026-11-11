@@ -43,12 +43,14 @@ SQL_PROMPT = "Generate an SQL query based on a prompt. Do not reply with anythin
 
 
 def _write_json_if_missing(path: Path, value: object) -> None:
+    """Create parent directories and write indented JSON if the file is absent."""
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
         path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
 
 def setup() -> None:
+    """Create the sample data, datasets, and version files, then upload test sets to Phoenix."""
     data_path = ROOT / "data" / "sample_sales.parquet"
     if not data_path.exists():
         data_path.parent.mkdir(parents=True, exist_ok=True)
@@ -93,6 +95,7 @@ def setup() -> None:
 
 
 def main() -> None:
+    """Parse CLI arguments and dispatch to the requested command."""
     parser = argparse.ArgumentParser(prog="python -m agent_evals")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("setup")
