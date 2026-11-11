@@ -13,11 +13,13 @@ from .agent import ChatProvider
 
 
 def _label(text: str, labels: tuple[str, str]) -> str | None:
+    """Normalize the judge's first-line response and return it only if it matches an allowed label."""
     cleaned = re.sub(r"^[^A-Za-z]+|[^A-Za-z]+$", "", text.strip()).casefold()
     return next((label for label in labels if cleaned == label.casefold()), None)
 
 
 def _judge(provider: ChatProvider, model: str, prompt: str, labels: tuple[str, str]) -> dict[str, Any]:
+    """Run an untraced LLM judgment and convert its label and explanation into a binary score."""
     with suppress_tracing():
         reply = provider.complete(model=model, messages=[{"role": "user", "content": prompt}])
     text = reply.content or ""
@@ -27,12 +29,14 @@ def _judge(provider: ChatProvider, model: str, prompt: str, labels: tuple[str, s
 
 
 def function_calling_eval(record: dict[str, Any], provider: ChatProvider, judge_model: str, tools: list[dict[str, Any]]) -> float:
+    """Return the mean correctness score for a run's tool calls."""
     return function_calling_evaluation(record, provider, judge_model, tools)["score"]
 
 
 def function_calling_evaluation(
     record: dict[str, Any], provider: ChatProvider, judge_model: str, tools: list[dict[str, Any]]
 ) -> dict[str, Any]:
+    """Judge each tool call against the question and tool definitions; runs with no calls score zero."""
     calls = record.get("tool_calls", [])
     if not calls:
         return {"score": 0.0, "label": "incorrect", "explanation": "The run made no tool calls."}
@@ -55,6 +59,7 @@ def function_calling_evaluation(
 
 
 def evaluate_sql_result(record: dict[str, Any] | None, expected: str) -> float:
+    """Compare digits in the first lookup result; failed runs score zero and skipped lookups score one."""
     if record is None or not record.get("tool_responses"):
         return 1.0 if record is not None else 0.0
     response = next(
@@ -67,6 +72,7 @@ def evaluate_sql_result(record: dict[str, Any] | None, expected: str) -> float:
 
 
 def evaluate_final_answer(record: dict[str, Any] | None, provider: ChatProvider, judge_model: str) -> dict[str, Any]:
+    """Return only clarity and entity scores, without judge labels or explanations."""
     return {
         name: judgment["score"]
         for name, judgment in evaluate_final_answer_details(record, provider, judge_model).items()
@@ -76,6 +82,7 @@ def evaluate_final_answer(record: dict[str, Any] | None, provider: ChatProvider,
 def evaluate_final_answer_details(
     record: dict[str, Any] | None, provider: ChatProvider, judge_model: str
 ) -> dict[str, dict[str, Any]]:
+    """Judge answer clarity and entity correctness, retaining each label and explanation."""
     if record is None:
         return {
             "evaluate_clarity": {"score": 0.0, "label": "unclear", "explanation": "The run failed."},
@@ -104,6 +111,7 @@ def evaluate_final_answer_details(
 
 
 def code_is_runnable(record: dict[str, Any] | None, timeout_seconds: int = 30) -> float:
+    """Run generated chart code in a temporary, time-limited subprocess and score its exit status."""
     if record is None:
         return 0.0
     response = next(
@@ -136,6 +144,7 @@ def code_is_runnable(record: dict[str, Any] | None, timeout_seconds: int = 30) -
 
 
 def convergence_score(path_lengths: list[int | None]) -> tuple[int | None, list[float], float]:
+    """Score completed paths against the shortest successful path; failed runs score zero."""
     completed = [length for length in path_lengths if length is not None]
     optimal = min(completed) if completed else None
     scores = [optimal / length if length is not None and optimal is not None else 0.0 for length in path_lengths]
