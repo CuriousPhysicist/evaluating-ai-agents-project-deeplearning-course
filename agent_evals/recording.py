@@ -18,6 +18,11 @@ _TRACING_REGISTERED = False
 
 
 def _local_base_url() -> str:
+    """Resolve the local Phoenix collector endpoint for the current environment.
+
+    Reads the configured collector URL from environment variables and validates
+    that it targets a local loopback address before returning the base URL.
+    """
     load_dotenv()
     endpoint = os.getenv("PHOENIX_COLLECTOR_ENDPOINT")
     if not endpoint:
@@ -31,6 +36,11 @@ def _local_base_url() -> str:
 
 
 def ensure_phoenix() -> Client:
+    """Ensure a local Phoenix server is running and return a configured client.
+
+    Starts the Phoenix CLI if needed, creates the project used for experiment
+    traces when absent, and registers the OpenTelemetry exporter once per process.
+    """
     global _TRACING_REGISTERED
     base_url = _local_base_url()
     client = Client(base_url=base_url)
@@ -83,6 +93,11 @@ def ensure_phoenix() -> Client:
 
 
 def upload_testsets(client: Client, root) -> tuple[str, str]:
+    """Upload the benchmark datasets to Phoenix and return their created names.
+
+    The overall and convergence question sets are loaded from the repository's
+    datasets directory and created in Phoenix only if they do not already exist.
+    """
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     overall_name = f"overall_experiment_inputs-{timestamp}"
     convergence_name = f"convergence_questions-{timestamp}"
