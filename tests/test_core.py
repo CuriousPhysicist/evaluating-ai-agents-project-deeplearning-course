@@ -28,7 +28,7 @@ from agent_evals.recording import PROJECT_NAME, ensure_phoenix
 from agent_evals.experiments import evaluate_version, print_comparison
 from agent_evals.scripted import ScriptedProvider
 
-
+# block: test providers
 class SimpleO1Provider:
     def __init__(self) -> None:
         self.router_calls = 0
@@ -121,7 +121,7 @@ class LoopProvider:
             return SimpleNamespace(content=None, tool_calls=[call])
         return SimpleNamespace(content="SELECT 1", tool_calls=[])
 
-
+# block: core tests
 def test_agent_records_tool_call_order_and_replies():
     provider = SimpleO1Provider()
     record = run_agent("Which product SKU sold the most units?", provider=provider)
@@ -287,7 +287,7 @@ def test_scripted_v1_and_v2_experiments_match_expected_scores(capsys):
     assert "0.86" in table and "0.71" in table
     assert table.rstrip().endswith("1")
 
-
+# block: live tests
 load_dotenv()
 
 
