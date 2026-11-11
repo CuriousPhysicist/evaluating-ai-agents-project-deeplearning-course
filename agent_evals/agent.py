@@ -151,6 +151,7 @@ def get_tool_definitions(settings: AgentSettings) -> list[dict[str, Any]]:
     return tools
 
 
+# Skills / Tools block: these are the functions that the agent can call to perform specific tasks. Each function takes in a prompt and returns a string result. The agent will use these functions to look up data, analyze it, and generate visualizations based on user queries.
 def lookup_sales_data(prompt: str, settings: AgentSettings, provider: ChatProvider) -> str:
     tracer = trace.get_tracer("agent_evals")
     with tracer.start_as_current_span("lookup_sales_data"):
@@ -215,7 +216,7 @@ def generate_visualization(
     )
     return _clean_fences(code_response.content or "", "python")
 
-
+# Main function to run the agent with a given question and version.
 def run_agent(
     question: str,
     version: str = "v1",
