@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from types import SimpleNamespace
 
 import pandas as pd
 import pytest
 from dotenv import load_dotenv
+from opentelemetry import trace
 
 from agent_evals.agent import (
     AgentSettings,
@@ -23,9 +25,9 @@ from agent_evals.evaluators import (
     evaluate_final_answer_details,
     function_calling_evaluation,
 )
-from agent_evals.__main__ import ROOT, setup
-from agent_evals.recording import PROJECT_NAME, ensure_phoenix
+from agent_evals.__main__ import setup
 from agent_evals.experiments import evaluate_version, print_comparison
+from agent_evals.recording import ensure_phoenix
 from agent_evals.scripted import ScriptedProvider
 
 # block: test providers
@@ -232,16 +234,16 @@ def test_chart_code_runs_in_temporary_directory_and_times_out(monkeypatch):
     assert code_is_runnable(no_secret, timeout_seconds=2) == 1
 
 
-def test_setup_creates_fixed_files_and_uploads_both_datasets():
-    overall_path = ROOT / "datasets" / "overall_questions.json"
-    convergence_path = ROOT / "datasets" / "convergence_questions.json"
+def test_setup_creates_fixed_files_and_uploads_both_datasets(tmp_path, isolated_phoenix):
+    overall_path = tmp_path / "datasets" / "overall_questions.json"
+    convergence_path = tmp_path / "datasets" / "convergence_questions.json"
+
+    setup(root=tmp_path, client=isolated_phoenix.client)
     original_overall = overall_path.read_bytes()
     original_convergence = convergence_path.read_bytes()
+    setup(root=tmp_path, client=isolated_phoenix.client)
 
-    setup()
-    setup()
-
-    sales = pd.read_parquet(ROOT / "data" / "sample_sales.parquet")
+    sales = pd.read_parquet(tmp_path / "data" / "sample_sales.parquet")
     assert len(sales) == 10
     assert list(sales.columns) == [
         "Store_Number",
@@ -256,8 +258,8 @@ def test_setup_creates_fixed_files_and_uploads_both_datasets():
     assert overall_path.read_bytes() == original_overall
     assert convergence_path.read_bytes() == original_convergence
 
-    client = ensure_phoenix()
-    assert client.projects.get(project_name=PROJECT_NAME)["name"] == PROJECT_NAME
+    client = isolated_phoenix.client
+    assert client.projects.get(project_name=isolated_phoenix.project_name)["name"] == isolated_phoenix.project_name
     datasets = client.datasets.list()
     overall_sets = [item for item in datasets if item["name"].startswith("overall_experiment_inputs-")]
     convergence_sets = [item for item in datasets if item["name"].startswith("convergence_questions-")]
@@ -293,21 +295,74 @@ def test_setup_and_agent_use_injected_temporary_root(tmp_path):
     assert "6200700" in record["tool_responses"][0]["tool_response"]
 
 
-def test_agent_run_is_exported_as_nested_phoenix_spans():
-    client = ensure_phoenix()
-    run_agent("Which product SKU sold the most units?", provider=SimpleO1Provider())
-    spans = client.spans.get_spans_dataframe(project_name=PROJECT_NAME, limit=500)
-    names = set(spans["name"].astype(str))
+def _span_ids(spans):
+    assert "context.span_id" in spans.columns, f"Unexpected span columns: {list(spans.columns)}"
+    return set(spans["context.span_id"].astype(str))
+
+
+def _spans_created_since(
+    client,
+    project_name,
+    previous_span_ids,
+    expected_names,
+    minimum_model_calls=0,
+):
+    deadline = time.monotonic() + 15
+    latest = None
+    while time.monotonic() < deadline:
+        spans = client.spans.get_spans_dataframe(project_name=project_name, limit=500)
+        if not spans.empty:
+            new_spans = spans.loc[~spans["context.span_id"].astype(str).isin(previous_span_ids)]
+            latest = new_spans
+            names = new_spans["name"].astype(str)
+            if expected_names <= set(names) and (names == "model_call").sum() >= minimum_model_calls:
+                return new_spans
+        time.sleep(0.1)
+    observed = set() if latest is None else set(latest["name"].astype(str))
+    model_calls = 0 if latest is None else int((latest["name"].astype(str) == "model_call").sum())
+    raise AssertionError(
+        f"Phoenix did not export all expected spans; missing: {expected_names - observed}; "
+        f"model calls: {model_calls}/{minimum_model_calls}"
+    )
+
+
+def test_agent_run_is_exported_as_nested_phoenix_spans(tmp_path, isolated_phoenix):
+    setup(root=tmp_path, client=isolated_phoenix.client)
+    client = isolated_phoenix.client
+    previous_span_ids = _span_ids(
+        client.spans.get_spans_dataframe(project_name=isolated_phoenix.project_name, limit=500)
+    )
+    run_agent(
+        "Which product SKU sold the most units?",
+        provider=SimpleO1Provider(),
+        root=tmp_path,
+    )
+    trace.get_tracer_provider().force_flush(timeout_millis=10_000)
     expected = {"AgentRun", "router_call", "handle_tool_calls", "lookup_sales_data", "execute_sql_query"}
+    spans = _spans_created_since(
+        client,
+        isolated_phoenix.project_name,
+        previous_span_ids,
+        expected,
+        minimum_model_calls=5,
+    )
+    names = set(spans["name"].astype(str))
     assert expected <= names, f"Missing spans: {expected - names}; observed: {names}"
-    assert "model_call" in names
+    assert (spans["name"].astype(str) == "model_call").sum() >= 5
 
 
-def test_scripted_v1_and_v2_experiments_match_expected_scores(capsys):
-    setup()
-    client = ensure_phoenix()
-    v1 = evaluate_version("v1", client, provider=ScriptedProvider())
-    v2 = evaluate_version("v2", client, provider=ScriptedProvider())
+def test_phoenix_rejects_tracing_destination_changes(isolated_phoenix):
+    with pytest.raises(RuntimeError, match="different endpoint or project"):
+        ensure_phoenix(
+            base_url=isolated_phoenix.base_url,
+            project_name="different-test-project",
+        )
+
+
+def test_scripted_v1_and_v2_experiments_match_expected_scores(capsys, tmp_path, isolated_phoenix):
+    setup(root=tmp_path, client=isolated_phoenix.client)
+    v1 = evaluate_version("v1", isolated_phoenix.client, root=tmp_path, provider=ScriptedProvider())
+    v2 = evaluate_version("v2", isolated_phoenix.client, root=tmp_path, provider=ScriptedProvider())
 
     assert round(v1["overall"]["means"]["function_calling_eval"], 2) == 0.93
     assert round(v1["overall"]["means"]["evaluate_sql_result"], 2) == 0.86
@@ -319,7 +374,7 @@ def test_scripted_v1_and_v2_experiments_match_expected_scores(capsys):
     assert round(v2["overall"]["means"]["evaluate_sql_result"], 2) == 0.71
     assert round(v2["path"]["mean"], 2) == 0.79
 
-    print_comparison(ROOT)
+    print_comparison(tmp_path)
     table = capsys.readouterr().out
     assert "v1" in table and "v2" in table
     assert "0.86" in table and "0.71" in table

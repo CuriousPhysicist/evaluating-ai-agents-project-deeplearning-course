@@ -14,9 +14,15 @@ partial pass cannot hide a missed requirement.
 - Use a fresh `tmp_path` for filesystem and result-file tests. Give `setup`
   an explicit root (or extract an equivalent helper that accepts `root`) so
   the test can start empty and cannot alter repository data.
-- For Phoenix-backed cases, use a local test server/project and compare
-  before/after traces or datasets; do not rely on global counts that include
-  prior test runs.
+- For Phoenix-backed cases, use the session-scoped `isolated_phoenix`
+  fixture: a separate loopback port, SQLite database under pytest's temporary
+  directory, and unique project name. The fixture starts and stops the server
+  and removes the database and log afterward.
+- Capture span IDs before a traced operation, flush the exporter, and inspect
+  only newly exported spans. Do not rely on global project counts or
+  timestamp-only windows.
+- Use the fixture's client for dataset and experiment operations. Do not call
+  the user's default Phoenix endpoint from tests.
 - Assert individual case outcomes as well as aggregate means. A correct mean
   alone can conceal incorrect per-case behavior.
 - Keep coverage separate from execution outcome: skipped tests are reported
@@ -283,13 +289,20 @@ reporting, T11's span hierarchy/counts, T12, judge prompt content in T13,
 per-case evaluator results in T14–T17, T18's containment case, and the
 per-case/version/table details in T19–T21.
 
-The filesystem-root seam is now available: setup and agent operations accept
-an injected root, and setup accepts an injected client for tests that do not
-need Phoenix. The root is exercised by
+The filesystem-root seam is available: setup and agent operations accept an
+injected root, and setup accepts an injected client. The root is exercised by
 `test_setup_and_agent_use_injected_temporary_root` in
-[`tests/test_core.py`](../tests/test_core.py). The wider proposed cases still
-need to be implemented; Phoenix trace tests should use a dedicated test
-instance or project.
+[`tests/test_core.py`](../tests/test_core.py).
+
+Phoenix-backed tests now share an isolated session fixture in
+[`tests/conftest.py`](../tests/conftest.py). Each pytest process gets a
+separate loopback server and temporary SQLite database, with a unique project.
+Tracing registration is bound to that endpoint/project for the process;
+attempting to register a different target fails explicitly. The setup,
+trace-export, and version-evaluation integration tests use this fixture and
+temporary project roots. The remaining proposed atomic assertions still need
+to be implemented. The current offline suite passes 13 tests; the two live
+tests are deselected without a configured API key.
 
 Until these tests exist and run, they contribute proposed coverage only. A
 test's existence establishes coverage evidence; its pass/fail/skip status is

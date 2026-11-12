@@ -14,17 +14,17 @@ from phoenix.client import Client
 
 PROJECT_NAME = "evaluating-agent"
 DEFAULT_BASE_URL = "http://127.0.0.1:6006"
-_TRACING_REGISTERED = False
+_TRACING_REGISTERED: tuple[str, str] | None = None
 
 
-def _local_base_url() -> str:
+def _local_base_url(endpoint: str | None = None) -> str:
     """Resolve the local Phoenix collector endpoint for the current environment.
 
-    Reads the configured collector URL from environment variables and validates
-    that it targets a local loopback address before returning the base URL.
+    Uses an explicit endpoint when given, otherwise reads the environment; in
+    either case, reject non-local collectors before returning the base URL.
     """
     load_dotenv()
-    endpoint = os.getenv("PHOENIX_COLLECTOR_ENDPOINT")
+    endpoint = endpoint or os.getenv("PHOENIX_COLLECTOR_ENDPOINT")
     if not endpoint:
         return DEFAULT_BASE_URL
     parsed = urlparse(endpoint)
@@ -35,14 +35,30 @@ def _local_base_url() -> str:
     return f"{parsed.scheme or 'http'}://{parsed.netloc}"
 
 
-def ensure_phoenix() -> Client:
+def ensure_phoenix(
+    *,
+    base_url: str | None = None,
+    project_name: str = PROJECT_NAME,
+) -> Client:
     """Ensure a local Phoenix server is running and return a configured client.
 
     Starts the Phoenix CLI if needed, creates the project used for experiment
     traces when absent, and registers the OpenTelemetry exporter once per process.
+    An explicit endpoint and project allow tests to use an isolated Phoenix server.
     """
     global _TRACING_REGISTERED
-    base_url = _local_base_url()
+    explicit_base_url = base_url is not None
+    base_url = _local_base_url(base_url)
+    if explicit_base_url:
+        collector_endpoint = f"{base_url}/v1/traces"
+    else:
+        collector_endpoint = os.getenv("PHOENIX_COLLECTOR_ENDPOINT") or f"{base_url}/v1/traces"
+    registration = (collector_endpoint, project_name)
+    if _TRACING_REGISTERED is not None and _TRACING_REGISTERED != registration:
+        raise RuntimeError(
+            "Phoenix tracing is already registered for a different endpoint or project in this process; "
+            "configure tracing once before creating agent traces"
+        )
     client = Client(base_url=base_url)
     try:
         client.projects.list()
@@ -80,15 +96,19 @@ def ensure_phoenix() -> Client:
         else:
             raise RuntimeError(f"Phoenix did not become ready; inspect {root / 'results' / 'phoenix.log'}")
     try:
-        client.projects.get(project_name=PROJECT_NAME)
+        client.projects.get(project_name=project_name)
     except Exception:
-        client.projects.create(name=PROJECT_NAME)
-    if not _TRACING_REGISTERED:
+        client.projects.create(name=project_name)
+    if _TRACING_REGISTERED is None:
         from phoenix.otel import register
 
-        endpoint = os.getenv("PHOENIX_COLLECTOR_ENDPOINT") or f"{base_url}/v1/traces"
-        register(endpoint=endpoint, project_name=PROJECT_NAME, protocol="http/protobuf", verbose=False)
-        _TRACING_REGISTERED = True
+        register(
+            endpoint=registration[0],
+            project_name=project_name,
+            protocol="http/protobuf",
+            verbose=False,
+        )
+        _TRACING_REGISTERED = registration
     return client
 
 
