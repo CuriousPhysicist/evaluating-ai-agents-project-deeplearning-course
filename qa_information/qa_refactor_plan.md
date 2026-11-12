@@ -53,6 +53,7 @@ client.
 The root seam is implemented in `agent_evals/paths.py` and is exercised by
 `test_setup_and_agent_use_injected_temporary_root`. The default-root path
 remains available to the CLI.
+
 &nbsp;
 ---
 ###### _v1.2 Date: 12th Nov. 2026_
