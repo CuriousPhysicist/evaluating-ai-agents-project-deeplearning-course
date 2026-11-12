@@ -33,6 +33,26 @@ $$
 
 _other considerations:_
 - Report skipped live tests separately to stop the coverage score looking strong while actually hiding failing or unexecuted tests.
+
+#### Root-path injection for isolated tests
+
+To keep setup and agent tests from reading or writing repository data, use one
+shared `DEFAULT_ROOT` with an optional `root` argument at filesystem
+boundaries. `setup`, `AgentSettings.load`, `run_agent`,
+`lookup_sales_data`, and `evaluate_version` accept and pass through this root;
+omitting it preserves the normal CLI behavior. A shared resolver selects the
+provided path or the repository default.
+
+Tests can pass a pytest temporary directory to `setup` and `run_agent`. The
+setup function also accepts an optional recording client, so filesystem tests
+can use a small fake client rather than start Phoenix. A `TemporaryDirectory`
+fixture can remove the test root after each test. Phoenix server state is
+external to this directory and should be tested separately or via an injected
+client.
+
+The root seam is implemented in `agent_evals/paths.py` and is exercised by
+`test_setup_and_agent_use_injected_temporary_root`. The default-root path
+remains available to the CLI.
 &nbsp;
 ---
-###### _v1.1 Date: 12th Nov. 2026_
+###### _v1.2 Date: 12th Nov. 2026_

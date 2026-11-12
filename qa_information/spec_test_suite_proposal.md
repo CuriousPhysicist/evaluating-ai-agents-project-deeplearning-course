@@ -272,7 +272,7 @@ an aggregate-only check.
 - `test_t21_scores_use_two_decimal_places`: assert the score strings use
   exactly two decimal places without relying only on substring matches.
 
-## Current gaps and prerequisites
+## Current gaps and test status
 
 [`tests/test_core.py`](../tests/test_core.py) already exercises parts of T1,
 T3, T5–T10, T11, and T13–T21. Its most important gaps relative to these
@@ -283,14 +283,13 @@ reporting, T11's span hierarchy/counts, T12, judge prompt content in T13,
 per-case evaluator results in T14–T17, T18's containment case, and the
 per-case/version/table details in T19–T21.
 
-Two seams should be made injectable before treating the whole proposal as an
-isolated, repeatable suite:
-
-1. `setup` currently uses the module-level repository `ROOT`; allow a root
-   argument so T1 can genuinely start from an empty temporary directory.
-2. Agent data and version loading use `agent_evals.agent.ROOT`; use a
-   temporary root or fixture-level monkeypatch consistently so tests do not
-   depend on checked-in generated files.
+The filesystem-root seam is now available: setup and agent operations accept
+an injected root, and setup accepts an injected client for tests that do not
+need Phoenix. The root is exercised by
+`test_setup_and_agent_use_injected_temporary_root` in
+[`tests/test_core.py`](../tests/test_core.py). The wider proposed cases still
+need to be implemented; Phoenix trace tests should use a dedicated test
+instance or project.
 
 Until these tests exist and run, they contribute proposed coverage only. A
 test's existence establishes coverage evidence; its pass/fail/skip status is

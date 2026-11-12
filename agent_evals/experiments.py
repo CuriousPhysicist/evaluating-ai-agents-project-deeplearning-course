@@ -16,6 +16,7 @@ from .evaluators import (
     function_calling_evaluation,
 )
 from .recording import PROJECT_NAME
+from .paths import resolve_root
 
 EVALUATOR_NAMES = [
     "function_calling_eval",
@@ -69,9 +70,9 @@ def evaluate_version(
     questions, scores overall and convergence metrics, writes the results to disk,
     and returns the aggregated summary for later comparison.
     """
-    root = root or Path(__file__).resolve().parents[1]
+    root = resolve_root(root)
     provider = provider or OpenAIProvider()
-    version_settings = AgentSettings.load(version)
+    version_settings = AgentSettings.load(version, root=root)
     judge_model = "gpt-4o"
     tool_definitions = get_tool_definitions(version_settings)
     overall_dataset = _latest_dataset(client, "overall_experiment_inputs-")
@@ -82,7 +83,7 @@ def evaluate_version(
     def task(input: dict[str, Any]) -> dict[str, Any]:
         """Run the agent for one question and store the resulting record by prompt."""
         question = str(input["question"])
-        record = run_agent(question, version, provider=provider)
+        record = run_agent(question, version, provider=provider, root=root)
         records[question] = record
         return record
 
@@ -150,7 +151,7 @@ def evaluate_version(
     def path_task(input: dict[str, Any]) -> dict[str, Any]:
         """Run the agent on a convergence question and cache the recorded path data."""
         question = str(input["question"])
-        record = run_agent(question, version, provider=provider)
+        record = run_agent(question, version, provider=provider, root=root)
         path_records[question] = record
         return record
 

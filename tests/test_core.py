@@ -121,6 +121,23 @@ class LoopProvider:
             return SimpleNamespace(content=None, tool_calls=[call])
         return SimpleNamespace(content="SELECT 1", tool_calls=[])
 
+
+class SetupDatasets:
+    def __init__(self) -> None:
+        self.created: list[dict] = []
+
+    def list(self) -> list[dict]:
+        return [{"name": item["name"]} for item in self.created]
+
+    def create_dataset(self, *, name: str, examples: list[dict]) -> None:
+        self.created.append({"name": name, "examples": examples})
+
+
+class SetupClient:
+    def __init__(self) -> None:
+        self.datasets = SetupDatasets()
+
+
 # block: core tests
 def test_agent_records_tool_call_order_and_replies():
     provider = SimpleO1Provider()
@@ -253,6 +270,27 @@ def test_setup_creates_fixed_files_and_uploads_both_datasets():
     assert set(first["output"]) == {"sql_result", "sql_generated"}
     assert "6200700" in first["output"]["sql_result"]
     assert "12" in first["output"]["sql_result"]
+
+
+def test_setup_and_agent_use_injected_temporary_root(tmp_path):
+    client = SetupClient()
+    setup(root=tmp_path, client=client)
+
+    assert (tmp_path / "data" / "sample_sales.parquet").exists()
+    assert (tmp_path / "datasets" / "overall_questions.json").exists()
+    assert (tmp_path / "datasets" / "convergence_questions.json").exists()
+    assert (tmp_path / "versions" / "v1.json").exists()
+    assert (tmp_path / "versions" / "v2.json").exists()
+    assert (tmp_path / "results").is_dir()
+    assert len(client.datasets.created) == 2
+
+    record = run_agent(
+        "Which product SKU sold the most units?",
+        provider=ScriptedProvider(),
+        root=tmp_path,
+    )
+    assert record["tool_responses"][0]["tool_name"] == "lookup_sales_data"
+    assert "6200700" in record["tool_responses"][0]["tool_response"]
 
 
 def test_agent_run_is_exported_as_nested_phoenix_spans():
