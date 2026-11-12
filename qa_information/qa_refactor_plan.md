@@ -17,6 +17,22 @@ This branch seeks to address this deficiency, in the process developing a suitab
 - Develop Metric
 - Set metric stardards
 - Refactor test suite  
+
+#### Metric development
+
+Key considerations in developing the metrics for assessing Spec Assurance:
+
+- Qualitative statements about the evidence of specification coverage should be limited to a small set. For example `Not Verified, Partially Verified, Indirectly verified, Directly Verified`
+- Evidence scores can be asigned to these judgements to convert into a numeric value for evaluation asa a metric.
+- A weighted sum of the evidence values can be used to provide either a fractional or % based measure of the level of assurance that specication requirements have been met.
+
+$$
+SpecAssurance (\%) =100\times\frac{\Sigma(Weight_i\times EvidenceScore_i)}{\Sigma Weight_i}
+$$
+- Test coverage metrics and test outcome metrics must be kept seperate.
+
+_other considerations:_
+- Report skipped live tests separately to stop the coverage score looking strong while actually hiding failing or unexecuted tests.
 &nbsp;
 ---
-###### _v1 Date: 11th Nov. 2026_
+###### _v1.1 Date: 12th Nov. 2026_
