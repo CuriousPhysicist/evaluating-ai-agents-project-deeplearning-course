@@ -71,9 +71,8 @@ performed once per process; a later request to silently switch destinations
 raises an error. Phoenix tests inspect only spans created after their own
 snapshot and use the isolated client for dataset and experiment operations.
 This keeps persisted traces and datasets out of the user's normal Phoenix
-instance. After implementing the first two test batches, the offline suite
-passes 35 tests with two live tests deselected after implementing the third
-test batch.
+instance. After implementing the first four test batches, the offline suite
+passes 35 tests with two live tests deselected.
 
 #### Focused T1–T21 test batches
 
@@ -88,8 +87,9 @@ Implement the proposed tests in batches that share test seams and behavior:
 3. **T6–T9 — tool behavior — implemented:** nine focused tests cover SQL
    fence removal and lookup errors, analysis fallback, chart configuration,
    returned code, and non-execution.
-4. **T10 — router-call limit:** test the agent's limit behavior here; verify
-   failure propagation and reporting with T19–T21.
+4. **T10 — router-call limit — agent-level check implemented:** verify the
+   agent stops at ten calls and returns no completed record; experiment-level
+   failure accounting is covered with T19–T21.
 5. **T11–T13 — traces and judges:** trace structure, judge-trace exclusion,
    and judge labels and prompts.
 6. **T14–T17 — evaluator scoring:** per-case evaluator results and aggregates.

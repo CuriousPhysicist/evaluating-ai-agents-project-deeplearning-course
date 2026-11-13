@@ -152,12 +152,11 @@ an aggregate-only check.
 ### T10 — router-call limit and failed run
 
 - `test_t10_loop_stops_at_ten_router_calls`: run LOOP with the specified
-  limit of ten; assert exactly ten router requests.
-- `test_t10_limit_exhaustion_returns_no_run_record`: assert the run is
-  reported as failed and no completed record is returned.
+  limit of ten; assert exactly ten router requests and that limit exhaustion
+  raises rather than returning a completed record.
 - `test_t10_failed_run_is_counted_in_results`: at the experiment boundary,
   assert the corresponding case has `failed=True` and its overall evaluator
-  scores are zero.
+  scores are zero. Implement this with T19–T21's experiment-level checks.
 
 ## T11–T13: traces and judge behavior
 
@@ -291,9 +290,9 @@ parts of T10, T11, and T13–T21. T1 and T2 have focused coverage in
 and data types, fixed question-set schemas and no-overwrite behavior, version
 and results paths, the isolated required project name, dataset naming, and
 uploaded example schemas and ground truth. Remaining gaps include end-to-end
-T10's ten-call failed-run reporting, T11's span hierarchy/counts, T12, judge
-prompt content in T13, per-case evaluator results in T14–T17, T18's
-containment case, and the per-case/version/table details in T19–T21.
+T10 experiment-level failed-run accounting, T11's span hierarchy/counts,
+T12, judge prompt content in T13, per-case evaluator results in T14–T17,
+T18's containment case, and the per-case/version/table details in T19–T21.
 
 The filesystem-root seam is available: setup and agent operations accept an
 injected root, and setup accepts an injected client. The root is exercised by

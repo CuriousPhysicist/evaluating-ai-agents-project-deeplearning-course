@@ -525,11 +525,19 @@ def test_lookup_error_and_empty_analysis_are_returned_as_tool_results():
     assert analyze_sales_data("", "Analyze nothing", settings, empty_provider) == "No analysis could be generated"
 
 
-def test_agent_stops_after_configured_router_call_limit():
+def test_t10_loop_stops_at_ten_router_calls(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
     provider = LoopProvider()
-    with pytest.raises(RuntimeError, match="max_router_calls=3"):
-        run_agent("Keep looking up sales", provider=provider, max_router_calls=3)
-    assert provider.router_calls == 3
+
+    with pytest.raises(RuntimeError, match="max_router_calls=10"):
+        run_agent(
+            "Keep looking up sales",
+            provider=provider,
+            max_router_calls=10,
+            root=tmp_path,
+        )
+
+    assert provider.router_calls == 10
 
 
 def test_convergence_score_excludes_failed_run_from_optimum():
