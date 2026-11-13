@@ -98,7 +98,7 @@ Implement the proposed tests in batches that share test seams and behavior:
 7. **T18 — generated-code isolation — implemented and accepted:**
    subprocess timeout, working-directory containment, and recovery after a
    timed-out run.
-8. **T19–T21 — experiments and comparison — implemented, awaiting review:**
+8. **T19–T21 — experiments and comparison — implemented and accepted:**
    convergence, versioned runs, result ordering, and exact comparison output.
 
 This sequence keeps related setup, fixtures, and behavioral assertions
