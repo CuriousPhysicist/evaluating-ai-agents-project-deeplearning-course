@@ -16,8 +16,10 @@ partial pass cannot hide a missed requirement.
   the test can start empty and cannot alter repository data.
 - For Phoenix-backed cases, use the session-scoped `isolated_phoenix`
   fixture: a separate loopback port, SQLite database under pytest's temporary
-  directory, and unique project name. The fixture starts and stops the server
-  and removes the database and log afterward.
+  directory, and the spec-required `evaluating-agent` project name. The
+  project name is safe to reuse because the server and database are isolated.
+  The fixture starts and stops the server and removes the database and log
+  afterward.
 - Capture span IDs before a traced operation, flush the exporter, and inspect
   only newly exported spans. Do not rely on global project counts or
   timestamp-only windows.
@@ -69,7 +71,8 @@ an aggregate-only check.
 ### T2 — uploaded Phoenix datasets
 
 - `test_t02_setup_creates_named_project_and_two_datasets`: assert the project
-  is `evaluating-agent` and both datasets exist.
+  on the isolated Phoenix server is `evaluating-agent` and both datasets
+  exist.
 - `test_t02_dataset_names_have_required_timestamp`: full-match each name
   against its prefix and `YYYY-MM-DD HH:MM:SS` timestamp format.
 - `test_t02_overall_dataset_has_exact_schema_and_ground_truth`: assert the
@@ -160,9 +163,10 @@ an aggregate-only check.
 
 ### T11 — nested Phoenix trace
 
-- `test_t11_trace_has_one_agent_run_and_three_router_calls`: query only the
-  trace created by this test; assert one `AgentRun` and three `router_call`
-  spans.
+- `test_t11_trace_has_one_agent_run_and_three_router_calls`: query
+  `isolated_phoenix.project_name` (asserted by T2 to be `evaluating-agent`)
+  and only the trace created by this test; assert one `AgentRun` and three
+  `router_call` spans.
 - `test_t11_trace_has_tool_hierarchy_and_clean_sql_input`: assert one
   `lookup_sales_data` span with one child `execute_sql_query` span whose
   input is the fence-free O1 reference SQL, and one `analyze_sales_data`
@@ -296,7 +300,8 @@ injected root, and setup accepts an injected client. The root is exercised by
 
 Phoenix-backed tests now share an isolated session fixture in
 [`tests/conftest.py`](../tests/conftest.py). Each pytest process gets a
-separate loopback server and temporary SQLite database, with a unique project.
+separate loopback server and temporary SQLite database, with the
+spec-required `evaluating-agent` project name.
 Tracing registration is bound to that endpoint/project for the process;
 attempting to register a different target fails explicitly. The setup,
 trace-export, and version-evaluation integration tests use this fixture and

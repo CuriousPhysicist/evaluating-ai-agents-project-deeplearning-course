@@ -58,11 +58,13 @@ remains available to the CLI.
 
 Phoenix-backed tests use a session-scoped fixture that starts a local server
 on an available loopback port, stores its SQLite database and log in pytest's
-temporary directory, and creates a unique project for that test process. The
-fixture passes its client and tracing destination explicitly, waits for the
-server to become ready, flushes tracing, stops the exact server process, and
-removes the temporary directory during teardown. External resources and
-unrelated API credentials are not passed to the test server.
+temporary directory, and creates the spec-required `evaluating-agent` project.
+The project name can be fixed because each pytest process uses its own server
+and database. The fixture passes its client and tracing destination
+explicitly, waits for the server to become ready, flushes tracing, stops the
+exact server process, and removes the temporary directory during teardown.
+External resources and unrelated API credentials are not passed to the test
+server.
 
 Tracing registration is now associated with its endpoint/project pair. It is
 performed once per process; a later request to silently switch destinations
@@ -71,6 +73,7 @@ snapshot and use the isolated client for dataset and experiment operations.
 This keeps persisted traces and datasets out of the user's normal Phoenix
 instance. The offline suite was validated with 13 passing tests and two live
 tests deselected.
+
 &nbsp;
 ---
 ###### _v1.3 Date: 12th Nov. 2026_

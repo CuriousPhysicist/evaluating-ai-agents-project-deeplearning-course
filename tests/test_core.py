@@ -259,7 +259,8 @@ def test_setup_creates_fixed_files_and_uploads_both_datasets(tmp_path, isolated_
     assert convergence_path.read_bytes() == original_convergence
 
     client = isolated_phoenix.client
-    assert client.projects.get(project_name=isolated_phoenix.project_name)["name"] == isolated_phoenix.project_name
+    assert isolated_phoenix.project_name == "evaluating-agent"
+    assert client.projects.get(project_name="evaluating-agent")["name"] == "evaluating-agent"
     datasets = client.datasets.list()
     overall_sets = [item for item in datasets if item["name"].startswith("overall_experiment_inputs-")]
     convergence_sets = [item for item in datasets if item["name"].startswith("convergence_questions-")]

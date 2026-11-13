@@ -6,7 +6,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,7 +13,7 @@ import pytest
 from opentelemetry import trace
 from phoenix.client import Client
 
-from agent_evals.recording import ensure_phoenix
+from agent_evals.recording import PROJECT_NAME, ensure_phoenix
 
 
 @dataclass(frozen=True)
@@ -58,7 +57,7 @@ def isolated_phoenix() -> IsolatedPhoenix:
     root = Path(temporary_directory.name)
     database_path = root / "phoenix.db"
     base_url = f"http://127.0.0.1:{port}"
-    project_name = f"agent-evals-test-{uuid.uuid4().hex}"
+    project_name = PROJECT_NAME
 
     safe_environment_keys = {
         "APPDATA",
