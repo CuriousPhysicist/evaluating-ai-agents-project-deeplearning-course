@@ -10,6 +10,7 @@ import pytest
 from dotenv import load_dotenv
 from opentelemetry import trace
 
+from agent_evals import agent as agent_module
 from agent_evals.agent import (
     AgentSettings,
     OpenAIProvider,
@@ -122,6 +123,34 @@ class ChartFallbackProvider:
             return SimpleNamespace(content="unreadable config", tool_calls=[])
         self.code_prompt = messages[-1]["content"]
         return SimpleNamespace(content="```python\nprint('chart')\n```", tool_calls=[])
+
+
+class SideEffectChartProvider:
+    def __init__(self, marker_path) -> None:
+        self.marker_path = marker_path
+        self.router_calls = 0
+        self.code = (
+            "from pathlib import Path\n"
+            f"Path({str(marker_path)!r}).write_text('executed', encoding='utf-8')"
+        )
+
+    def complete(self, *, model, messages, tools=None, json_mode=False):
+        if tools:
+            self.router_calls += 1
+            if self.router_calls == 1:
+                tool_call = SimpleNamespace(
+                    id="call_visualize",
+                    function=SimpleNamespace(
+                        name="generate_visualization",
+                        arguments=json.dumps({"data": "sample", "visualization_goal": "side effect test"}),
+                    ),
+                )
+                return SimpleNamespace(content=None, tool_calls=[tool_call])
+            return SimpleNamespace(content="Chart code generated.", tool_calls=[])
+        if json_mode:
+            config = {"chart_type": "bar", "x_axis": "x", "y_axis": "y", "title": "side effect test"}
+            return SimpleNamespace(content=json.dumps(config), tool_calls=[])
+        return SimpleNamespace(content=self.code, tool_calls=[])
 
 
 class LoopProvider:
@@ -345,6 +374,148 @@ def test_router_judge_normalizes_labels_and_keeps_explanation():
     assert unmatched == {"score": 0.0, "label": "incorrect", "explanation": ""}
 
 
+def test_t06_removes_sql_fences_before_execution(tmp_path, monkeypatch):
+    setup(root=tmp_path, client=SetupClient())
+    provider = SimpleO1Provider()
+    executed_sql = []
+    connect = agent_module.duckdb.connect
+
+    class RecordingConnection:
+        def __init__(self) -> None:
+            self.connection = connect()
+
+        def __enter__(self):
+            self.connection.__enter__()
+            return self
+
+        def __exit__(self, exception_type, exception, traceback):
+            return self.connection.__exit__(exception_type, exception, traceback)
+
+        def register(self, *args, **kwargs):
+            return self.connection.register(*args, **kwargs)
+
+        def execute(self, query, *args, **kwargs):
+            executed_sql.append(query)
+            return self.connection.execute(query, *args, **kwargs)
+
+    monkeypatch.setattr(agent_module.duckdb, "connect", RecordingConnection)
+    run_agent(
+        "Which product SKU sold the most units?",
+        provider=provider,
+        root=tmp_path,
+    )
+
+    assert executed_sql[-1] == (
+        "SELECT SKU_Coded, SUM(Qty_Sold) AS Total_Qty FROM sales "
+        "GROUP BY SKU_Coded ORDER BY Total_Qty DESC LIMIT 1"
+    )
+
+
+def test_t06_lookup_returns_expected_result_without_error(tmp_path):
+    record, _ = _run_o1(tmp_path)
+    lookup_response = record["tool_responses"][0]["tool_response"]
+
+    assert not lookup_response.startswith("Error accessing data:")
+    assert "6200700" in lookup_response
+    assert "12" in lookup_response
+
+
+def test_t07_v2_sql_failure_is_returned_as_tool_response(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    provider = ScriptedProvider()
+    record = run_agent(
+        "What was the total sales value across all stores?",
+        version="v2",
+        provider=provider,
+        root=tmp_path,
+    )
+
+    assert record["tool_responses"][0]["tool_name"] == "lookup_sales_data"
+    assert record["tool_responses"][0]["tool_response"].startswith("Error accessing data:")
+
+
+def test_t07_agent_produces_error_case_answer_after_lookup_failure(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    provider = ScriptedProvider()
+    record = run_agent(
+        "What was the total sales value across all stores?",
+        version="v2",
+        provider=provider,
+        root=tmp_path,
+    )
+
+    assert record["final_output"] == "I could not retrieve the total sales value because the query failed."
+    assert record["path_length"] == 7
+
+
+def test_t08_empty_analysis_reply_returns_fallback(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    provider = ScriptedProvider()
+    record = run_agent("Analyze nothing", provider=provider, root=tmp_path)
+
+    assert record["tool_responses"][0] == {
+        "tool_name": "analyze_sales_data",
+        "tool_response": "No analysis could be generated",
+    }
+
+
+def test_t09_chart_code_fences_are_removed_and_code_is_returned(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    provider = ScriptedProvider()
+    record = run_agent(
+        "Make a bar chart of total sales value by store",
+        provider=provider,
+        root=tmp_path,
+    )
+
+    visualization_response = next(
+        item["tool_response"]
+        for item in record["tool_responses"]
+        if item["tool_name"] == "generate_visualization"
+    )
+    assert visualization_response == "print(totals_by_store)"
+
+
+def test_t09_agent_does_not_execute_generated_chart_code(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    marker_path = tmp_path / "generated-code-ran.txt"
+    provider = SideEffectChartProvider(marker_path)
+    record = run_agent("Make a chart for the supplied data", provider=provider, root=tmp_path)
+
+    assert record["tool_responses"][0]["tool_response"] == provider.code
+    assert record["final_output"] == "Chart code generated."
+    assert not marker_path.exists()
+
+
+def test_t09_unreadable_config_uses_exact_fallback_fields(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    provider = ChartFallbackProvider()
+    settings = AgentSettings.load("v1", root=tmp_path)
+    code = generate_visualization("data", "odd chart", settings, provider)
+    config_text = provider.code_prompt.split("\n", 1)[1].split("\nData:", 1)[0]
+
+    assert code == "print('chart')"
+    assert json.loads(config_text) == {
+        "chart_type": "line",
+        "x_axis": "date",
+        "y_axis": "value",
+        "title": "odd chart",
+    }
+
+
+def test_t09_generated_code_that_would_fail_does_not_fail_agent_run(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    provider = ScriptedProvider()
+    record = run_agent(
+        "Make a bar chart of total sales value by store",
+        provider=provider,
+        root=tmp_path,
+    )
+
+    assert record["tool_responses"][-1]["tool_response"] == "print(totals_by_store)"
+    assert record["final_output"].endswith("print(totals_by_store)")
+
+
 def test_lookup_error_and_empty_analysis_are_returned_as_tool_results():
     settings = AgentSettings.load("v1")
     error_provider = ErrorProvider()
@@ -352,17 +523,6 @@ def test_lookup_error_and_empty_analysis_are_returned_as_tool_results():
 
     assert lookup_sales_data("Look up sales", settings, error_provider).startswith("Error accessing data:")
     assert analyze_sales_data("", "Analyze nothing", settings, empty_provider) == "No analysis could be generated"
-
-
-def test_visualization_uses_fallback_config_for_unreadable_reply():
-    provider = ChartFallbackProvider()
-    code = generate_visualization("data", "odd chart", AgentSettings.load("v1"), provider)
-
-    assert code == "print('chart')"
-    assert '"chart_type": "line"' in provider.code_prompt
-    assert '"x_axis": "date"' in provider.code_prompt
-    assert '"y_axis": "value"' in provider.code_prompt
-    assert '"title": "odd chart"' in provider.code_prompt
 
 
 def test_agent_stops_after_configured_router_call_limit():
