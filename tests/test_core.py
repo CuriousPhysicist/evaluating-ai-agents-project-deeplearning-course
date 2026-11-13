@@ -889,6 +889,93 @@ def test_t13_stored_judgments_keep_label_and_explanation(evaluated_v1_with_instr
     }
 
 
+def _evaluated_case_scores(evaluated_version):
+    return {
+        case["question"]: case["scores"]
+        for case in evaluated_version["result"]["overall"]["cases"]
+    }
+
+
+def test_t14_router_scores_each_planted_case(evaluated_v1_with_instrumented_judges):
+    scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
+    assert scores["Which product SKU sold the most units?"]["function_calling_eval"] == 1
+    assert scores["What share of transactions had a promotion?"]["function_calling_eval"] == 0.5
+
+    hello = function_calling_evaluation(
+        {"question": "Hello", "tool_calls": []},
+        JudgeProvider("unused"),
+        "judge",
+        [],
+    )
+    assert hello["score"] == 0
+
+
+def test_t14_router_mean_is_expected(evaluated_v1_with_instrumented_judges):
+    mean = evaluated_v1_with_instrumented_judges["result"]["overall"]["means"]["function_calling_eval"]
+    assert mean == pytest.approx(6.5 / 7)
+
+
+def test_t15_sql_result_scores_each_planted_case(evaluated_v1_with_instrumented_judges):
+    scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
+    assert scores["Which product SKU sold the most units?"]["evaluate_sql_result"] == 1
+    assert scores["Make a bar chart of total sales value by store"]["evaluate_sql_result"] == 1
+    assert scores["What share of transactions had a promotion?"]["evaluate_sql_result"] == 1
+    assert scores["Which store had the highest total sales value?"]["evaluate_sql_result"] == 0
+
+
+def test_t15_missing_lookup_response_scores_one():
+    assert evaluate_sql_result({"tool_responses": []}, "12") == 1
+    assert evaluate_sql_result(
+        {"tool_responses": [{"tool_name": "analyze_sales_data", "tool_response": "12"}]},
+        "12",
+    ) == 1
+
+
+def test_t15_sql_result_mean_is_expected(evaluated_v1_with_instrumented_judges):
+    mean = evaluated_v1_with_instrumented_judges["result"]["overall"]["means"]["evaluate_sql_result"]
+    assert mean == pytest.approx(6 / 7)
+
+
+def test_t16_clarity_scores_only_o7_zero(evaluated_v1_with_instrumented_judges):
+    scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
+    clarity = {question: item["evaluate_clarity"] for question, item in scores.items()}
+    assert clarity["Draw a line chart of monthly sales value in 2021"] == 0
+    assert all(
+        score == 1
+        for question, score in clarity.items()
+        if question != "Draw a line chart of monthly sales value in 2021"
+    )
+    assert sum(clarity.values()) / 7 == pytest.approx(6 / 7)
+
+
+def test_t16_entity_scores_only_o6_zero(evaluated_v1_with_instrumented_judges):
+    scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
+    entities = {question: item["evaluate_entity_correctness"] for question, item in scores.items()}
+    assert entities["What was the average value of a transaction?"] == 0
+    assert all(
+        score == 1
+        for question, score in entities.items()
+        if question != "What was the average value of a transaction?"
+    )
+    assert sum(entities.values()) / 7 == pytest.approx(6 / 7)
+
+
+def test_t17_chart_evaluator_scores_o4_o7_and_non_chart_case(evaluated_v1_with_instrumented_judges):
+    scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
+    assert scores["Make a bar chart of total sales value by store"]["code_is_runnable"] == 0
+    assert scores["Draw a line chart of monthly sales value in 2021"]["code_is_runnable"] == 1
+    assert scores["Which product SKU sold the most units?"]["code_is_runnable"] == 1
+
+
+def test_t17_missing_record_scores_zero():
+    assert code_is_runnable(None) == 0
+
+
+def test_t17_chart_code_mean_is_expected(evaluated_v1_with_instrumented_judges):
+    mean = evaluated_v1_with_instrumented_judges["result"]["overall"]["means"]["code_is_runnable"]
+    assert mean == pytest.approx(6 / 7)
+
+
 def test_phoenix_rejects_tracing_destination_changes(isolated_phoenix):
     with pytest.raises(RuntimeError, match="different endpoint or project"):
         ensure_phoenix(

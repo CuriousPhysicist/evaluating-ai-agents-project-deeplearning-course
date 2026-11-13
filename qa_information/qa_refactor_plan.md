@@ -93,7 +93,8 @@ Implement the proposed tests in batches that share test seams and behavior:
 5. **T11–T13 — traces and judges — implemented, awaiting review:** trace
    structure and SQL input, judge-trace exclusion, and stored judge labels
    and explanations.
-6. **T14–T17 — evaluator scoring:** per-case evaluator results and aggregates.
+6. **T14–T17 — evaluator scoring — implemented, awaiting review:** planted
+   per-case scores, missing-tool semantics, and aggregate means.
 7. **T18 — generated-code isolation:** subprocess timeout and working
    directory isolation.
 8. **T19–T21 — experiments and comparison:** convergence, versioned runs,
@@ -114,9 +115,14 @@ instrumented OpenAI client with a mock HTTP transport and an in-memory span
 exporter to prove judge calls are suppressed without making network requests;
 the same experiment verifies prompt/record separation, unchanged O1 path
 length, and the persisted O2 judgment label and explanation.
-The complete offline suite now passes 43 tests; the two live tests remain
+
+Batch 6 reuses the full scripted v1 experiment to assert evaluator results
+for the planted O1/O3/O4/O5/O6/O7 cases and exact aggregate means. It also
+checks the HELLO no-call router score, the specified missing-lookup behavior,
+and the missing-record chart score without adding another experiment run.
+The complete offline suite now passes 53 tests; the two live tests remain
 deselected because no API key is configured.
 
 &nbsp;
 ---
-###### _v1.5 Date: 13th Nov. 2026_
+###### _v1.6 Date: 13th Nov. 2026_
