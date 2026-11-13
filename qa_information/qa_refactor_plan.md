@@ -90,16 +90,16 @@ Implement the proposed tests in batches that share test seams and behavior:
 4. **T10 — router-call limit — agent-level check implemented:** verify the
    agent stops at ten calls and returns no completed record; experiment-level
    failure accounting is covered with T19–T21.
-5. **T11–T13 — traces and judges — implemented, awaiting review:** trace
+5. **T11–T13 — traces and judges — implemented and accepted:** trace
    structure and SQL input, judge-trace exclusion, and stored judge labels
    and explanations.
-6. **T14–T17 — evaluator scoring — implemented, awaiting review:** planted
+6. **T14–T17 — evaluator scoring — implemented and accepted:** planted
    per-case scores, missing-tool semantics, and aggregate means.
-7. **T18 — generated-code isolation — implemented, awaiting review:**
+7. **T18 — generated-code isolation — implemented and accepted:**
    subprocess timeout, working-directory containment, and recovery after a
    timed-out run.
-8. **T19–T21 — experiments and comparison:** convergence, versioned runs,
-   result ordering, and failed-run counts.
+8. **T19–T21 — experiments and comparison — implemented, awaiting review:**
+   convergence, versioned runs, result ordering, and exact comparison output.
 
 This sequence keeps related setup, fixtures, and behavioral assertions
 together while leaving slower or cross-cutting checks in distinct batches.
@@ -125,9 +125,15 @@ and the missing-record chart score without adding another experiment run.
 Batch 7 separates the timeout, filesystem-containment, and post-timeout
 recovery checks. It confirms the O7 chart code still runs after an infinite
 loop is terminated and retains a separate check that generated code does not
-inherit the project API key. The complete offline suite now passes 56 tests;
-the two live tests remain deselected because no API key is configured.
+inherit the project API key.
+
+Batch 8 checks convergence cases and scores, then reuses the v1 run and
+executes v2 once to verify task counts, stored experiment names, SQL prompt
+differences, and planted SQL regressions. Comparison output is parsed to
+assert columns, row order, values, and two-decimal formatting. The complete
+offline suite now passes 65 tests; the two live tests remain deselected
+because no API key is configured.
 
 &nbsp;
 ---
-###### _v1.7 Date: 13th Nov. 2026_
+###### _v1.8 Date: 13th Nov. 2026_

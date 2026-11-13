@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 from collections import Counter
 from types import SimpleNamespace
@@ -107,6 +108,7 @@ class InstrumentedScriptedProvider:
         self.scripted = ScriptedProvider()
         self.judge_prompts: list[str] = []
         self.judge_responses: list[str] = []
+        self.sql_prompts: list[str] = []
         self._response_content = ""
         self._response_number = 0
         transport = httpx.MockTransport(self._mock_response)
@@ -149,6 +151,8 @@ class InstrumentedScriptedProvider:
 
     def complete(self, *, model, messages, tools=None, json_mode=False):
         prompt = "\n".join(str(message.get("content", "")) for message in messages)
+        if "Generate an SQL query" in prompt:
+            self.sql_prompts.append(prompt)
         is_judge = prompt.startswith(
             (
                 "Judge whether this tool call",
@@ -171,6 +175,17 @@ class InstrumentedScriptedProvider:
 
     def close(self) -> None:
         self.client.close()
+
+
+class SQLPromptCapturingProvider(ScriptedProvider):
+    def __init__(self) -> None:
+        self.sql_prompts: list[str] = []
+
+    def complete(self, *, model, messages, tools=None, json_mode=False):
+        prompt = "\n".join(str(message.get("content", "")) for message in messages)
+        if "Generate an SQL query" in prompt:
+            self.sql_prompts.append(prompt)
+        return super().complete(model=model, messages=messages, tools=tools, json_mode=json_mode)
 
 
 class JudgeProvider:
@@ -824,10 +839,12 @@ def evaluated_v1_with_instrumented_judges(tmp_path_factory, isolated_phoenix):
         experiment = client.experiments.get_experiment(experiment_id=result["overall"]["experiment_id"])
         evaluation_instrumented_count = len(judge_span_exporter.get_finished_spans())
         return {
+            "root": root,
             "result": result,
             "experiment": experiment,
             "judge_prompts": tuple(provider.judge_prompts),
             "judge_responses": tuple(provider.judge_responses),
+            "sql_prompts": tuple(provider.sql_prompts),
             "baseline_instrumented_count": baseline_instrumented_count,
             "evaluation_instrumented_count": evaluation_instrumented_count,
         }
@@ -1008,6 +1025,167 @@ def test_t17_chart_code_mean_is_expected(evaluated_v1_with_instrumented_judges):
     assert mean == pytest.approx(6 / 7)
 
 
+@pytest.fixture(scope="module")
+def evaluated_v1_v2(evaluated_v1_with_instrumented_judges, isolated_phoenix):
+    v1_evaluation = evaluated_v1_with_instrumented_judges
+    root = v1_evaluation["root"]
+    client = isolated_phoenix.client
+    v2_provider = SQLPromptCapturingProvider()
+    v2_result = evaluate_version("v2", client, root=root, provider=v2_provider)
+
+    def experiment_data(result, kind):
+        ran_experiment = client.experiments.get_experiment(
+            experiment_id=result[kind]["experiment_id"]
+        )
+        stored_experiment = next(
+            experiment
+            for experiment in client.experiments.list(dataset_id=ran_experiment["dataset_id"])
+            if experiment["id"] == ran_experiment["experiment_id"]
+        )
+        return ran_experiment, stored_experiment
+
+    v1_overall, v1_overall_metadata = experiment_data(v1_evaluation["result"], "overall")
+    v1_path, v1_path_metadata = experiment_data(v1_evaluation["result"], "path")
+    v2_overall, v2_overall_metadata = experiment_data(v2_result, "overall")
+    v2_path, v2_path_metadata = experiment_data(v2_result, "path")
+
+    return {
+        "root": root,
+        "v1": v1_evaluation["result"],
+        "v2": v2_result,
+        "v1_sql_prompts": v1_evaluation["sql_prompts"],
+        "v2_sql_prompts": tuple(v2_provider.sql_prompts),
+        "experiments": {
+            "v1_overall": v1_overall,
+            "v1_overall_metadata": v1_overall_metadata,
+            "v1_path": v1_path,
+            "v1_path_metadata": v1_path_metadata,
+            "v2_overall": v2_overall,
+            "v2_overall_metadata": v2_overall_metadata,
+            "v2_path": v2_path,
+            "v2_path_metadata": v2_path_metadata,
+        },
+    }
+
+
+def test_t19_path_lengths_match_k1_to_k6(evaluated_v1_v2):
+    path_cases = evaluated_v1_v2["v1"]["path"]["cases"]
+    assert [case["path_length"] for case in path_cases] == [5, 5, 5, 5, 7, None]
+    assert [case["failed"] for case in path_cases] == [False, False, False, False, False, True]
+
+
+def test_t19_failed_path_is_excluded_from_optimum_but_scores_zero(evaluated_v1_v2):
+    path = evaluated_v1_v2["v1"]["path"]
+    failed_case = path["cases"][-1]
+    assert path["optimal_path_length"] == 5
+    assert failed_case["failed"] is True
+    assert failed_case["path_length"] is None
+    assert failed_case["score"] == 0
+
+
+def test_t19_each_convergence_score_and_mean_is_exact(evaluated_v1_v2):
+    path = evaluated_v1_v2["v1"]["path"]
+    assert [case["score"] for case in path["cases"]] == pytest.approx([1, 1, 1, 1, 5 / 7, 0])
+    assert path["mean"] == pytest.approx((4 + 5 / 7) / 6)
+
+
+def test_t20_both_versions_run_identical_cases_once(evaluated_v1_v2):
+    v1 = evaluated_v1_v2["v1"]
+    v2 = evaluated_v1_v2["v2"]
+    for kind, expected_count in (("overall", 7), ("path", 6)):
+        v1_questions = [case["question"] for case in v1[kind]["cases"]]
+        v2_questions = [case["question"] for case in v2[kind]["cases"]]
+        assert len(v1_questions) == expected_count
+        assert len(v2_questions) == expected_count
+        assert len(set(v1_questions)) == expected_count
+        assert len(set(v2_questions)) == expected_count
+        assert v1_questions == v2_questions
+
+        for version in ("v1", "v2"):
+            experiment = evaluated_v1_v2["experiments"][f"{version}_{kind}"]
+            task_runs = experiment["task_runs"]
+            assert len(task_runs) == expected_count
+            assert all(run["repetition_number"] == 1 for run in task_runs)
+            assert len({run["dataset_example_id"] for run in task_runs}) == expected_count
+
+
+def test_t20_experiment_names_include_version(evaluated_v1_v2):
+    experiments = evaluated_v1_v2["experiments"]
+    assert experiments["v1_overall_metadata"]["name"] == "Overall Experiment v1"
+    assert experiments["v2_overall_metadata"]["name"] == "Overall Experiment v2"
+    assert experiments["v1_path_metadata"]["name"] == "Convergence Eval v1"
+    assert experiments["v2_path_metadata"]["name"] == "Convergence Eval v2"
+
+
+def test_t20_v2_sql_prompt_contains_added_phrase(evaluated_v1_v2):
+    v1_prompts = evaluated_v1_v2["v1_sql_prompts"]
+    v2_prompts = evaluated_v1_v2["v2_sql_prompts"]
+    assert v1_prompts and v2_prompts
+    assert all("Think before you respond." not in prompt for prompt in v1_prompts)
+    assert all("Think before you respond." in prompt for prompt in v2_prompts)
+
+
+def test_t20_v2_sql_scores_show_both_regressions(evaluated_v1_v2):
+    v2 = evaluated_v1_v2["v2"]
+    scores = {
+        case["question"]: case["scores"]["evaluate_sql_result"]
+        for case in v2["overall"]["cases"]
+    }
+    assert scores["What was the total sales value across all stores?"] == 0
+    assert scores["Which store had the highest total sales value?"] == 0
+    assert all(
+        score == 1
+        for question, score in scores.items()
+        if question
+        not in {
+            "What was the total sales value across all stores?",
+            "Which store had the highest total sales value?",
+        }
+    )
+    assert v2["overall"]["means"]["evaluate_sql_result"] == pytest.approx(5 / 7)
+
+
+def _comparison_table(root, capsys):
+    print_comparison(root)
+    lines = [
+        line
+        for line in capsys.readouterr().out.splitlines()
+        if line and not line.startswith("-")
+    ]
+    return [[cell.strip() for cell in line.split("|")] for line in lines]
+
+
+def test_t21_comparison_has_exact_columns_and_version_order(evaluated_v1_v2, capsys):
+    table = _comparison_table(evaluated_v1_v2["root"], capsys)
+    assert table[0] == [
+        "version",
+        "function_calling_eval",
+        "evaluate_sql_result",
+        "evaluate_clarity",
+        "evaluate_entity_correctness",
+        "code_is_runnable",
+        "convergence",
+        "optimal path length",
+        "failed runs",
+    ]
+    assert [row[0] for row in table[1:]] == ["v1", "v2"]
+
+
+def test_t21_comparison_values_match_case_results(evaluated_v1_v2, capsys):
+    table = _comparison_table(evaluated_v1_v2["root"], capsys)
+    assert table[1:] == [
+        ["v1", "0.93", "0.86", "0.86", "0.86", "0.86", "0.79", "5", "1"],
+        ["v2", "0.93", "0.71", "0.86", "0.86", "0.86", "0.79", "5", "1"],
+    ]
+
+
+def test_t21_scores_use_two_decimal_places(evaluated_v1_v2, capsys):
+    table = _comparison_table(evaluated_v1_v2["root"], capsys)
+    for row in table[1:]:
+        for score in row[1:7]:
+            assert re.fullmatch(r"\d+\.\d{2}", score)
+
+
 def test_phoenix_rejects_tracing_destination_changes(isolated_phoenix):
     with pytest.raises(RuntimeError, match="different endpoint or project"):
         ensure_phoenix(
@@ -1015,29 +1193,6 @@ def test_phoenix_rejects_tracing_destination_changes(isolated_phoenix):
             project_name="different-test-project",
         )
 
-
-def test_scripted_v1_and_v2_experiments_match_expected_scores(capsys, tmp_path, isolated_phoenix):
-    setup(root=tmp_path, client=isolated_phoenix.client)
-    v1_provider = ScriptedProvider()
-    v2_provider = ScriptedProvider()
-    v1 = evaluate_version("v1", isolated_phoenix.client, root=tmp_path, provider=v1_provider)
-    v2 = evaluate_version("v2", isolated_phoenix.client, root=tmp_path, provider=v2_provider)
-
-    assert round(v1["overall"]["means"]["function_calling_eval"], 2) == 0.93
-    assert round(v1["overall"]["means"]["evaluate_sql_result"], 2) == 0.86
-    assert round(v1["overall"]["means"]["evaluate_clarity"], 2) == 0.86
-    assert round(v1["overall"]["means"]["evaluate_entity_correctness"], 2) == 0.86
-    assert round(v1["overall"]["means"]["code_is_runnable"], 2) == 0.86
-    assert round(v1["path"]["mean"], 2) == 0.79
-    assert v1["path"]["optimal_path_length"] == 5
-    assert round(v2["overall"]["means"]["evaluate_sql_result"], 2) == 0.71
-    assert round(v2["path"]["mean"], 2) == 0.79
-
-    print_comparison(tmp_path)
-    table = capsys.readouterr().out
-    assert "v1" in table and "v2" in table
-    assert "0.86" in table and "0.71" in table
-    assert table.rstrip().endswith("1")
 
 # block: live tests
 load_dotenv()

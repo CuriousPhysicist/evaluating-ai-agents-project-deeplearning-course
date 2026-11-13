@@ -254,7 +254,7 @@ an aggregate-only check.
   optimal length is `5`, K6 score is `0`, and it does not affect the
   optimum.
 - `test_t19_each_convergence_score_and_mean_is_exact`: assert scores
-  `[1, 1, 1, 1, 5/7, 0]` and mean `4.714/6` (approximately `0.79`).
+  `[1, 1, 1, 1, 5/7, 0]` and mean `(4 + 5/7) / 6` (approximately `0.79`).
 
 ### T20 — fixed cases and version experiments
 
@@ -288,15 +288,15 @@ an aggregate-only check.
 
 [`tests/test_core.py`](../tests/test_core.py) now has focused T3–T9 tests for
 agent protocol, tool behavior, and visualization safety; it also exercises
-parts of T10 and T19–T21. T1 and T2 have focused coverage in
+part of T10. T1 and T2 have focused coverage in
 [`tests/test_setup_spec.py`](../tests/test_setup_spec.py): fresh-root files
 and data types, fixed question-set schemas and no-overwrite behavior, version
 and results paths, the isolated required project name, dataset naming, and
 uploaded example schemas and ground truth. Remaining gaps include end-to-end
-T10 experiment-level failed-run accounting and the per-case/version/table
-details in T19–T21. T11–T18 now have focused trace, judge-tracing, prompt,
-persisted judgment, per-case evaluator, aggregate-score, timeout, and
-filesystem-containment coverage.
+T10 experiment-level failed-run accounting. T11–T21 now have focused trace,
+judge-tracing, prompt, persisted judgment, per-case evaluator, aggregate
+score, timeout, filesystem-containment, convergence, version, and comparison
+coverage.
 
 The filesystem-root seam is available: setup and agent operations accept an
 injected root, and setup accepts an injected client. The root is exercised by
@@ -310,8 +310,8 @@ spec-required `evaluating-agent` project name.
 Tracing registration is bound to that endpoint/project for the process;
 attempting to register a different target fails explicitly. The setup,
 trace-export, and version-evaluation integration tests use this fixture and
-temporary project roots. The T11–T18 batches are implemented and validated.
-The offline suite passes 56 tests, with the two live tests deselected because
+temporary project roots. The T11–T21 batches are implemented and validated.
+The offline suite passes 65 tests, with the two live tests deselected because
 no API key is configured.
 
 For requirements not yet implemented, the listed tests remain proposals.
