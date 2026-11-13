@@ -74,6 +74,34 @@ This keeps persisted traces and datasets out of the user's normal Phoenix
 instance. The offline suite was validated with 13 passing tests and two live
 tests deselected.
 
+#### Focused T1–T21 test batches
+
+Implement the proposed tests in batches that share test seams and behavior:
+
+1. **T1–T2 — setup and uploaded datasets:** temporary project roots and the
+   isolated Phoenix backend.
+2. **T3–T5 — agent protocol and run records:** tool ordering, message roles,
+   call IDs, and tool replies.
+3. **T6–T9 — tool behavior:** SQL lookup, analysis fallback, and
+   visualization configuration and code handling.
+4. **T10 — router-call limit:** test the agent's limit behavior here; verify
+   failure propagation and reporting with T19–T21.
+5. **T11–T13 — traces and judges:** trace structure, judge-trace exclusion,
+   and judge labels and prompts.
+6. **T14–T17 — evaluator scoring:** per-case evaluator results and aggregates.
+7. **T18 — generated-code isolation:** subprocess timeout and working
+   directory isolation.
+8. **T19–T21 — experiments and comparison:** convergence, versioned runs,
+   result ordering, and failed-run counts.
+
+This sequence keeps related setup, fixtures, and behavioral assertions
+together while leaving slower or cross-cutting checks in distinct batches.
+Keep T identifiers in test names or markers for spec traceability, but make
+each test establish its own preconditions; tests must not rely on execution
+order. In particular, T10's loop-limit behavior is distinct from its
+experiment-level failure accounting, and T18 exercises a subprocess boundary
+unlike the in-process evaluator checks.
+
 &nbsp;
 ---
-###### _v1.3 Date: 12th Nov. 2026_
+###### _v1.4 Date: 13th Nov. 2026_
