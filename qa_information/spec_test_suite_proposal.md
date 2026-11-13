@@ -284,16 +284,18 @@ an aggregate-only check.
 
 ## Current gaps and test status
 
-[`tests/test_core.py`](../tests/test_core.py) already exercises parts of T3,
-T5–T10, T11, and T13–T21. T1 and T2 now have focused coverage in
+[`tests/test_core.py`](../tests/test_core.py) now has focused T3–T5 tests for
+exact tool arguments, run records, multi-call replies, and tool-call ID
+multiplicity; it also exercises parts of T6–T10, T11, and T13–T21. T1 and T2
+have focused coverage in
 [`tests/test_setup_spec.py`](../tests/test_setup_spec.py): fresh-root files
 and data types, fixed question-set schemas and no-overwrite behavior, version
 and results paths, the isolated required project name, dataset naming, and
-uploaded example schemas and ground truth. Remaining gaps include T4, exact
-call/reply multiplicity in T5, end-to-end T7, T9's no-execution guarantee,
-T10's ten-call failed-run reporting, T11's span hierarchy/counts, T12, judge
-prompt content in T13, per-case evaluator results in T14–T17, T18's
-containment case, and the per-case/version/table details in T19–T21.
+uploaded example schemas and ground truth. Remaining gaps include end-to-end
+T7, T9's no-execution guarantee, T10's ten-call failed-run reporting, T11's
+span hierarchy/counts, T12, judge prompt content in T13, per-case evaluator
+results in T14–T17, T18's containment case, and the per-case/version/table
+details in T19–T21.
 
 The filesystem-root seam is available: setup and agent operations accept an
 injected root, and setup accepts an injected client. The root is exercised by
@@ -308,7 +310,7 @@ Tracing registration is bound to that endpoint/project for the process;
 attempting to register a different target fails explicitly. The setup,
 trace-export, and version-evaluation integration tests use this fixture and
 temporary project roots. The remaining proposed atomic assertions still need
-to be implemented. The current offline suite passes 20 tests; the two live
+to be implemented. The current offline suite passes 27 tests; the two live
 tests are deselected without a configured API key.
 
 Until these tests exist and run, they contribute proposed coverage only. A

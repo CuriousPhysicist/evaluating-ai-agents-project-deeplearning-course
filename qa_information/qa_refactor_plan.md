@@ -71,9 +71,8 @@ performed once per process; a later request to silently switch destinations
 raises an error. Phoenix tests inspect only spans created after their own
 snapshot and use the isolated client for dataset and experiment operations.
 This keeps persisted traces and datasets out of the user's normal Phoenix
-instance. The offline suite was validated with 13 passing tests and two live
-tests deselected. After implementing the first test batch, the offline suite
-passes 20 tests with two live tests deselected.
+instance. After implementing the first two test batches, the offline suite
+passes 27 tests with two live tests deselected.
 
 #### Focused T1–T21 test batches
 
@@ -82,8 +81,9 @@ Implement the proposed tests in batches that share test seams and behavior:
 1. **T1–T2 — setup and uploaded datasets — implemented:** covered by eight
    focused tests in `tests/test_setup_spec.py`, using temporary project roots
    and the isolated Phoenix backend.
-2. **T3–T5 — agent protocol and run records:** tool ordering, message roles,
-   call IDs, and tool replies.
+2. **T3–T5 — agent protocol and run records — implemented:** eight focused
+   tests cover exact tool arguments, run records, multi-call ordering, and
+   exactly one reply per tool-call ID.
 3. **T6–T9 — tool behavior:** SQL lookup, analysis fallback, and
    visualization configuration and code handling.
 4. **T10 — router-call limit:** test the agent's limit behavior here; verify
