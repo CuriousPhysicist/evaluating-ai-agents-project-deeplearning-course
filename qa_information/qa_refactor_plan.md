@@ -95,8 +95,9 @@ Implement the proposed tests in batches that share test seams and behavior:
    and explanations.
 6. **T14–T17 — evaluator scoring — implemented, awaiting review:** planted
    per-case scores, missing-tool semantics, and aggregate means.
-7. **T18 — generated-code isolation:** subprocess timeout and working
-   directory isolation.
+7. **T18 — generated-code isolation — implemented, awaiting review:**
+   subprocess timeout, working-directory containment, and recovery after a
+   timed-out run.
 8. **T19–T21 — experiments and comparison:** convergence, versioned runs,
    result ordering, and failed-run counts.
 
@@ -120,9 +121,13 @@ Batch 6 reuses the full scripted v1 experiment to assert evaluator results
 for the planted O1/O3/O4/O5/O6/O7 cases and exact aggregate means. It also
 checks the HELLO no-call router score, the specified missing-lookup behavior,
 and the missing-record chart score without adding another experiment run.
-The complete offline suite now passes 53 tests; the two live tests remain
-deselected because no API key is configured.
+
+Batch 7 separates the timeout, filesystem-containment, and post-timeout
+recovery checks. It confirms the O7 chart code still runs after an infinite
+loop is terminated and retains a separate check that generated code does not
+inherit the project API key. The complete offline suite now passes 56 tests;
+the two live tests remain deselected because no API key is configured.
 
 &nbsp;
 ---
-###### _v1.6 Date: 13th Nov. 2026_
+###### _v1.7 Date: 13th Nov. 2026_

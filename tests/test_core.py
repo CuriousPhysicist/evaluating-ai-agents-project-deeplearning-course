@@ -632,11 +632,43 @@ def test_convergence_score_excludes_failed_run_from_optimum():
     assert round(mean, 2) == 0.68
 
 
-def test_chart_code_runs_in_temporary_directory_and_times_out(monkeypatch):
-    record = {"tool_responses": [{"tool_name": "generate_visualization", "tool_response": "print('ok')"}]}
+def test_t18_infinite_chart_code_times_out():
+    looping = {"tool_responses": [{"tool_name": "generate_visualization", "tool_response": "while True: pass"}]}
+    started = time.monotonic()
+    assert code_is_runnable(looping, timeout_seconds=2) == 0
+    assert time.monotonic() - started < 10
+
+
+def test_t18_chart_code_cannot_write_into_project_directory(tmp_path):
+    escape_path = tmp_path / "escape.txt"
+    record = {
+        "tool_responses": [
+            {
+                "tool_name": "generate_visualization",
+                "tool_response": "from pathlib import Path; Path('escape.txt').write_text('escaped')",
+            }
+        ]
+    }
+
     assert code_is_runnable(record, timeout_seconds=2) == 1
+    assert not escape_path.exists()
+
+
+def test_t18_valid_o7_chart_code_runs_after_timeout_case(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
     looping = {"tool_responses": [{"tool_name": "generate_visualization", "tool_response": "while True: pass"}]}
     assert code_is_runnable(looping, timeout_seconds=1) == 0
+
+    provider = ScriptedProvider()
+    o7_record = run_agent(
+        "Draw a line chart of monthly sales value in 2021",
+        provider=provider,
+        root=tmp_path,
+    )
+    assert code_is_runnable(o7_record, timeout_seconds=2) == 1
+
+
+def test_chart_code_runs_without_project_api_key(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-only-key")
     no_secret = {
         "tool_responses": [

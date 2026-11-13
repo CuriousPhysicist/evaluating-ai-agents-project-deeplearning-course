@@ -288,15 +288,15 @@ an aggregate-only check.
 
 [`tests/test_core.py`](../tests/test_core.py) now has focused T3–T9 tests for
 agent protocol, tool behavior, and visualization safety; it also exercises
-parts of T10 and T18–T21. T1 and T2 have focused coverage in
+parts of T10 and T19–T21. T1 and T2 have focused coverage in
 [`tests/test_setup_spec.py`](../tests/test_setup_spec.py): fresh-root files
 and data types, fixed question-set schemas and no-overwrite behavior, version
 and results paths, the isolated required project name, dataset naming, and
 uploaded example schemas and ground truth. Remaining gaps include end-to-end
-T10 experiment-level failed-run accounting, T18's containment case, and the
-per-case/version/table details in T19–T21. T11–T17 now have focused trace,
-judge-tracing, prompt, persisted judgment, per-case evaluator, and aggregate
-score coverage.
+T10 experiment-level failed-run accounting and the per-case/version/table
+details in T19–T21. T11–T18 now have focused trace, judge-tracing, prompt,
+persisted judgment, per-case evaluator, aggregate-score, timeout, and
+filesystem-containment coverage.
 
 The filesystem-root seam is available: setup and agent operations accept an
 injected root, and setup accepts an injected client. The root is exercised by
@@ -310,9 +310,9 @@ spec-required `evaluating-agent` project name.
 Tracing registration is bound to that endpoint/project for the process;
 attempting to register a different target fails explicitly. The setup,
 trace-export, and version-evaluation integration tests use this fixture and
-temporary project roots. The T11–T13 batch is implemented and validated; the
-T14–T17 batch is also implemented and validated. The offline suite passes 53
-tests, with the two live tests deselected because no API key is configured.
+temporary project roots. The T11–T18 batches are implemented and validated.
+The offline suite passes 56 tests, with the two live tests deselected because
+no API key is configured.
 
 For requirements not yet implemented, the listed tests remain proposals.
 Test existence establishes coverage evidence; pass/fail/skip status remains
