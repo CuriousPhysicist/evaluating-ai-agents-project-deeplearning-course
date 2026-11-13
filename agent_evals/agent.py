@@ -13,6 +13,7 @@ from typing import Any, Protocol
 import duckdb
 import pandas as pd
 from dotenv import load_dotenv
+from openinference.semconv.trace import SpanAttributes
 from pydantic import BaseModel, ValidationError
 from opentelemetry import trace
 
@@ -163,24 +164,24 @@ def lookup_sales_data(
 ) -> str:
     sample_path = resolve_root(root) / "data" / "sample_sales.parquet"
     tracer = trace.get_tracer("agent_evals")
-    with tracer.start_as_current_span("lookup_sales_data"):
-        try:
-            columns = ", ".join(pd.read_parquet(sample_path).columns)
-            sql_prompt = f"{settings.sql_generation_prompt}\n{prompt}\nAvailable columns: {columns}\nTable: sales"
-            response = _complete(
-                provider,
-                model=settings.agent_model,
-                messages=[{"role": "user", "content": sql_prompt}],
-            )
-            sql = _clean_fences(response.content or "", "sql")
-            with tracer.start_as_current_span("execute_sql_query"):
-                frame = pd.read_parquet(sample_path)
-                with duckdb.connect() as connection:
-                    connection.register("sample_sales", frame)
-                    connection.execute("CREATE TABLE sales AS SELECT * FROM sample_sales")
-                    return connection.execute(sql).df().to_string(index=False)
-        except Exception as error:
-            return f"Error accessing data: {error}"
+    try:
+        columns = ", ".join(pd.read_parquet(sample_path).columns)
+        sql_prompt = f"{settings.sql_generation_prompt}\n{prompt}\nAvailable columns: {columns}\nTable: sales"
+        response = _complete(
+            provider,
+            model=settings.agent_model,
+            messages=[{"role": "user", "content": sql_prompt}],
+        )
+        sql = _clean_fences(response.content or "", "sql")
+        with tracer.start_as_current_span("execute_sql_query") as span:
+            span.set_attribute(SpanAttributes.INPUT_VALUE, sql)
+            frame = pd.read_parquet(sample_path)
+            with duckdb.connect() as connection:
+                connection.register("sample_sales", frame)
+                connection.execute("CREATE TABLE sales AS SELECT * FROM sample_sales")
+                return connection.execute(sql).df().to_string(index=False)
+    except Exception as error:
+        return f"Error accessing data: {error}"
 
 
 def analyze_sales_data(data: str, prompt: str, settings: AgentSettings, provider: ChatProvider) -> str:

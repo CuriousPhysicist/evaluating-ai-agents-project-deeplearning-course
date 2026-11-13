@@ -6,9 +6,15 @@ import time
 from collections import Counter
 from types import SimpleNamespace
 
+import httpx
 import pytest
 from dotenv import load_dotenv
+from openai import OpenAI
 from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from openinference.instrumentation.openai import OpenAIInstrumentor
 
 from agent_evals import agent as agent_module
 from agent_evals.agent import (
@@ -94,6 +100,77 @@ class MultiCallSpyProvider(ScriptedProvider):
             _assert_exact_tool_replies(request_snapshot)
             self.router_requests.append(request_snapshot)
         return super().complete(model=model, messages=messages, tools=tools, json_mode=json_mode)
+
+
+class InstrumentedScriptedProvider:
+    def __init__(self) -> None:
+        self.scripted = ScriptedProvider()
+        self.judge_prompts: list[str] = []
+        self.judge_responses: list[str] = []
+        self._response_content = ""
+        self._response_number = 0
+        transport = httpx.MockTransport(self._mock_response)
+        self.client = OpenAI(
+            api_key="test-only-key",
+            http_client=httpx.Client(transport=transport),
+        )
+
+    def _mock_response(self, request: httpx.Request) -> httpx.Response:
+        self._response_number += 1
+        body = json.loads(request.content)
+        return httpx.Response(
+            status_code=200,
+            json={
+                "id": f"chatcmpl-test-{self._response_number}",
+                "object": "chat.completion",
+                "created": 1_700_000_000 + self._response_number,
+                "model": body["model"],
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": self._response_content},
+                        "finish_reason": "stop",
+                    }
+                ],
+                "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+            },
+        )
+
+    def _complete_instrumented(self, *, model, messages):
+        response = self.client.chat.completions.create(model=model, messages=messages)
+        return response.choices[0].message
+
+    def control_call(self):
+        self._response_content = "control\nScripted reason."
+        return self._complete_instrumented(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": "OpenAI instrumentation control"}],
+        )
+
+    def complete(self, *, model, messages, tools=None, json_mode=False):
+        prompt = "\n".join(str(message.get("content", "")) for message in messages)
+        is_judge = prompt.startswith(
+            (
+                "Judge whether this tool call",
+                "Is the answer precise",
+                "Are all entities",
+            )
+        )
+        scripted_reply = self.scripted.complete(
+            model=model,
+            messages=messages,
+            tools=tools,
+            json_mode=json_mode,
+        )
+        if not is_judge:
+            return scripted_reply
+        self.judge_prompts.append(prompt)
+        self.judge_responses.append(scripted_reply.content or "")
+        self._response_content = scripted_reply.content or ""
+        return self._complete_instrumented(model=model, messages=messages)
+
+    def close(self) -> None:
+        self.client.close()
 
 
 class JudgeProvider:
@@ -358,19 +435,27 @@ def test_lookup_evaluator_compares_digits_and_handles_skipped_tool():
     assert evaluate_sql_result(None, "12") == 0
 
 
-def test_router_judge_normalizes_labels_and_keeps_explanation():
+def test_t13_normalizes_capitalized_punctuated_label():
     record = {
         "question": "Look up total sales",
         "tool_calls": [{"name": "lookup_sales_data", "arguments": {"prompt": "Look up total sales"}}],
     }
     tools = [{"function": {"name": "lookup_sales_data"}}]
     correct_provider = JudgeProvider("Correct!\nScripted reason.")
-    unmatched_provider = JudgeProvider("maybe")
-
     correct = function_calling_evaluation(record, correct_provider, "judge", tools)
-    unmatched = function_calling_evaluation(record, unmatched_provider, "judge", tools)
 
     assert correct == {"score": 1.0, "label": "correct", "explanation": "Scripted reason."}
+
+
+def test_t13_unmatched_label_scores_zero():
+    record = {
+        "question": "Look up total sales",
+        "tool_calls": [{"name": "lookup_sales_data", "arguments": {"prompt": "Look up total sales"}}],
+    }
+    tools = [{"function": {"name": "lookup_sales_data"}}]
+    unmatched_provider = JudgeProvider("maybe")
+    unmatched = function_calling_evaluation(record, unmatched_provider, "judge", tools)
+
     assert unmatched == {"score": 0.0, "label": "incorrect", "explanation": ""}
 
 
@@ -617,7 +702,8 @@ def _spans_created_since(
     )
 
 
-def test_agent_run_is_exported_as_nested_phoenix_spans(tmp_path, isolated_phoenix):
+@pytest.fixture
+def traced_o1_spans(tmp_path, isolated_phoenix):
     setup(root=tmp_path, client=isolated_phoenix.client)
     client = isolated_phoenix.client
     previous_span_ids = _span_ids(
@@ -630,17 +716,177 @@ def test_agent_run_is_exported_as_nested_phoenix_spans(tmp_path, isolated_phoeni
         root=tmp_path,
     )
     trace.get_tracer_provider().force_flush(timeout_millis=10_000)
-    expected = {"AgentRun", "router_call", "handle_tool_calls", "lookup_sales_data", "execute_sql_query"}
     spans = _spans_created_since(
         client,
         isolated_phoenix.project_name,
         previous_span_ids,
-        expected,
+        {"AgentRun", "router_call", "handle_tool_calls", "lookup_sales_data", "execute_sql_query", "analyze_sales_data"},
         minimum_model_calls=5,
     )
-    names = set(spans["name"].astype(str))
-    assert expected <= names, f"Missing spans: {expected - names}; observed: {names}"
-    assert (spans["name"].astype(str) == "model_call").sum() >= 5
+    trace_id = str(spans["context.trace_id"].iloc[0])
+    trace_spans = client.spans.get_spans(
+        project_identifier=isolated_phoenix.project_name,
+        trace_ids=[trace_id],
+    )
+    return spans, trace_spans, provider
+
+
+def test_t11_trace_has_one_agent_run_and_three_router_calls(traced_o1_spans):
+    spans, _, _ = traced_o1_spans
+    assert spans["context.trace_id"].astype(str).nunique() == 1
+    counts = Counter(spans["name"].astype(str))
+    assert counts["AgentRun"] == 1
+    assert counts["router_call"] == 3
+
+
+def test_t11_trace_has_tool_hierarchy_and_clean_sql_input(traced_o1_spans):
+    spans, trace_spans, provider = traced_o1_spans
+    counts = Counter(spans["name"].astype(str))
+    assert counts["lookup_sales_data"] == 1
+    assert counts["execute_sql_query"] == 1
+    assert counts["analyze_sales_data"] == 1
+
+    root_span_id = spans.loc[spans["name"] == "AgentRun", "context.span_id"].iloc[0]
+    handle_span_ids = set(spans.loc[spans["name"] == "handle_tool_calls", "context.span_id"])
+    lookup_span_id = spans.loc[spans["name"] == "lookup_sales_data", "context.span_id"].iloc[0]
+    assert set(spans.loc[spans["name"] == "handle_tool_calls", "parent_id"]) == {root_span_id}
+    assert spans.loc[spans["name"] == "lookup_sales_data", "parent_id"].iloc[0] in handle_span_ids
+    assert spans.loc[spans["name"] == "analyze_sales_data", "parent_id"].iloc[0] in handle_span_ids
+    assert spans.loc[spans["name"] == "execute_sql_query", "parent_id"].iloc[0] == lookup_span_id
+
+    sql_span = next(span for span in trace_spans if span["name"] == "execute_sql_query")
+    assert sql_span["attributes"]["input.value"] == provider.executed_sql
+
+
+def test_t11_trace_contains_at_least_five_model_calls(traced_o1_spans):
+    spans, _, _ = traced_o1_spans
+    model_calls = spans.loc[spans["name"] == "model_call"]
+    router_span_ids = set(spans.loc[spans["name"] == "router_call", "context.span_id"])
+    lookup_span_id = spans.loc[spans["name"] == "lookup_sales_data", "context.span_id"].iloc[0]
+    analysis_span_id = spans.loc[spans["name"] == "analyze_sales_data", "context.span_id"].iloc[0]
+
+    assert len(model_calls) >= 5
+    assert model_calls["parent_id"].isin(router_span_ids).sum() >= 3
+    assert (model_calls["parent_id"] == lookup_span_id).sum() >= 1
+    assert (model_calls["parent_id"] == analysis_span_id).sum() >= 1
+
+
+@pytest.fixture(scope="module")
+def evaluated_v1_with_instrumented_judges(tmp_path_factory, isolated_phoenix):
+    root = tmp_path_factory.mktemp("t12-t13")
+    client = isolated_phoenix.client
+    setup(root=root, client=client)
+    provider = InstrumentedScriptedProvider()
+    instrumentor = OpenAIInstrumentor()
+    judge_span_exporter = InMemorySpanExporter()
+    judge_tracer_provider = TracerProvider()
+    judge_tracer_provider.add_span_processor(SimpleSpanProcessor(judge_span_exporter))
+    try:
+        instrumentor.instrument(tracer_provider=judge_tracer_provider)
+        provider.control_call()
+        baseline_instrumented_count = len(judge_span_exporter.get_finished_spans())
+        assert baseline_instrumented_count == 1, "OpenAI instrumentation did not export its control call"
+
+        result = evaluate_version("v1", client, root=root, provider=provider)
+        trace.get_tracer_provider().force_flush(timeout_millis=10_000)
+        experiment = client.experiments.get_experiment(experiment_id=result["overall"]["experiment_id"])
+        evaluation_instrumented_count = len(judge_span_exporter.get_finished_spans())
+        return {
+            "result": result,
+            "experiment": experiment,
+            "judge_prompts": tuple(provider.judge_prompts),
+            "judge_responses": tuple(provider.judge_responses),
+            "baseline_instrumented_count": baseline_instrumented_count,
+            "evaluation_instrumented_count": evaluation_instrumented_count,
+        }
+    finally:
+        instrumentor.uninstrument()
+        provider.close()
+        judge_tracer_provider.shutdown()
+
+
+def test_t12_evaluation_judge_calls_are_not_exported_as_agent_spans(
+    evaluated_v1_with_instrumented_judges,
+):
+    evaluated = evaluated_v1_with_instrumented_judges
+    assert evaluated["evaluation_instrumented_count"] == evaluated["baseline_instrumented_count"]
+
+
+def test_t12_judge_prompts_are_absent_from_run_records(evaluated_v1_with_instrumented_judges):
+    experiment = evaluated_v1_with_instrumented_judges["experiment"]
+    records = [run["output"] for run in experiment["task_runs"]]
+    serialized_records = [json.dumps(record) for record in records]
+
+    assert records
+    assert all(
+        prompt not in serialized
+        for prompt in evaluated_v1_with_instrumented_judges["judge_prompts"]
+        for serialized in serialized_records
+    )
+
+
+def test_t12_evaluation_does_not_change_agent_path_length(evaluated_v1_with_instrumented_judges):
+    records = [
+        run["output"]
+        for run in evaluated_v1_with_instrumented_judges["experiment"]["task_runs"]
+    ]
+    o1_record = next(
+        record
+        for record in records
+        if record["question"] == "Which product SKU sold the most units?"
+    )
+    assert o1_record["path_length"] == 7
+
+
+def test_t13_judge_prompt_requests_only_the_two_named_labels(evaluated_v1_with_instrumented_judges):
+    prompts = evaluated_v1_with_instrumented_judges["judge_prompts"]
+    assert prompts
+    for prompt in prompts:
+        assert "Explain on the second line." in prompt
+        if prompt.startswith("Judge whether this tool call"):
+            assert "exactly correct or incorrect" in prompt
+        elif prompt.startswith("Is the answer precise"):
+            assert "exactly clear or unclear" in prompt
+        elif prompt.startswith("Are all entities"):
+            assert "exactly correct or incorrect" in prompt
+        else:
+            pytest.fail(f"Unrecognized judge prompt: {prompt}")
+        assert not any(term in prompt.lower() for term in ("numeric rating", "scale of", "1 to 5"))
+
+
+def test_t13_stored_judgments_keep_label_and_explanation(evaluated_v1_with_instrumented_judges):
+    experiment = evaluated_v1_with_instrumented_judges["experiment"]
+    task_run = next(
+        run
+        for run in experiment["task_runs"]
+        if run["output"]["question"] == "What was the total sales value across all stores?"
+    )
+    o2_judge_responses = [
+        response
+        for prompt, response in zip(
+            evaluated_v1_with_instrumented_judges["judge_prompts"],
+            evaluated_v1_with_instrumented_judges["judge_responses"],
+        )
+        if prompt.startswith("Judge whether this tool call")
+        and "Question: What was the total sales value across all stores?" in prompt
+    ]
+    assert o2_judge_responses == [
+        "Correct!\nScripted reason.",
+        "Correct!\nScripted reason.",
+    ]
+
+    router_evaluations = [
+        evaluation
+        for evaluation in experiment["evaluation_runs"]
+        if evaluation.experiment_run_id == task_run["id"]
+        and evaluation.name == "function_calling_eval"
+    ]
+    assert len(router_evaluations) == 1
+    assert router_evaluations[0].result == {
+        "score": 1.0,
+        "label": "correct",
+        "explanation": "Scripted reason. Scripted reason.",
+    }
 
 
 def test_phoenix_rejects_tracing_destination_changes(isolated_phoenix):

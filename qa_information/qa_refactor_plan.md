@@ -90,8 +90,9 @@ Implement the proposed tests in batches that share test seams and behavior:
 4. **T10 — router-call limit — agent-level check implemented:** verify the
    agent stops at ten calls and returns no completed record; experiment-level
    failure accounting is covered with T19–T21.
-5. **T11–T13 — traces and judges:** trace structure, judge-trace exclusion,
-   and judge labels and prompts.
+5. **T11–T13 — traces and judges — implemented, awaiting review:** trace
+   structure and SQL input, judge-trace exclusion, and stored judge labels
+   and explanations.
 6. **T14–T17 — evaluator scoring:** per-case evaluator results and aggregates.
 7. **T18 — generated-code isolation:** subprocess timeout and working
    directory isolation.
@@ -106,6 +107,16 @@ order. In particular, T10's loop-limit behavior is distinct from its
 experiment-level failure accounting, and T18 exercises a subprocess boundary
 unlike the in-process evaluator checks.
 
+Batch 5 removes the duplicate inner `lookup_sales_data` span and annotates
+`execute_sql_query` with its fence-free SQL input. Its Phoenix tests assert
+exact counts and parent/child relationships. A full v1 experiment uses an
+instrumented OpenAI client with a mock HTTP transport and an in-memory span
+exporter to prove judge calls are suppressed without making network requests;
+the same experiment verifies prompt/record separation, unchanged O1 path
+length, and the persisted O2 judgment label and explanation.
+The complete offline suite now passes 43 tests; the two live tests remain
+deselected because no API key is configured.
+
 &nbsp;
 ---
-###### _v1.4 Date: 13th Nov. 2026_
+###### _v1.5 Date: 13th Nov. 2026_

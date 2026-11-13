@@ -169,17 +169,20 @@ an aggregate-only check.
 - `test_t11_trace_has_tool_hierarchy_and_clean_sql_input`: assert one
   `lookup_sales_data` span with one child `execute_sql_query` span whose
   input is the fence-free O1 reference SQL, and one `analyze_sales_data`
-  span. Assert parent/child relationships, not just span-name presence.
+  span. Assert exact counts and parent/child relationships, not just
+  span-name presence.
 - `test_t11_trace_contains_at_least_five_model_calls`: assert at least three
   router, one SQL-generation, and one analysis model-call spans.
 
 ### T12 — judges do not pollute agent traces or records
 
 - `test_t12_evaluation_judge_calls_are_not_exported_as_agent_spans`: run
-  evaluation and inspect only its agent traces; assert no judge model-call
-  span or judge prompt appears.
+  a full evaluation with an instrumented OpenAI client backed by a mock
+  transport; verify an unsuppressed control call exports a span and judge
+  calls do not add spans.
 - `test_t12_judge_prompts_are_absent_from_run_records`: inspect returned
-  records and assert neither clarity nor tool-call judge prompt is present.
+  Phoenix task records and assert no captured clarity or tool-call judge
+  prompt is present.
 - `test_t12_evaluation_does_not_change_agent_path_length`: assert O1 remains
   path length seven after evaluation.
 
@@ -194,7 +197,7 @@ an aggregate-only check.
   asks for an explanation (not a numeric rating).
 - `test_t13_stored_judgments_keep_label_and_explanation`: assert the two O2
   tool-call judgments normalize to `correct`, aggregate score is `1`, and
-  each judgment carries `Scripted reason.`.
+  Phoenix stores the aggregate label and both `Scripted reason.` explanations.
 
 ## T14–T18: evaluators and generated-code isolation
 
@@ -285,14 +288,15 @@ an aggregate-only check.
 
 [`tests/test_core.py`](../tests/test_core.py) now has focused T3–T9 tests for
 agent protocol, tool behavior, and visualization safety; it also exercises
-parts of T10, T11, and T13–T21. T1 and T2 have focused coverage in
+parts of T10 and T14–T21. T1 and T2 have focused coverage in
 [`tests/test_setup_spec.py`](../tests/test_setup_spec.py): fresh-root files
 and data types, fixed question-set schemas and no-overwrite behavior, version
 and results paths, the isolated required project name, dataset naming, and
 uploaded example schemas and ground truth. Remaining gaps include end-to-end
-T10 experiment-level failed-run accounting, T11's span hierarchy/counts,
-T12, judge prompt content in T13, per-case evaluator results in T14–T17,
-T18's containment case, and the per-case/version/table details in T19–T21.
+T10 experiment-level failed-run accounting, per-case evaluator results in
+T14–T17, T18's containment case, and the per-case/version/table details in
+T19–T21. T11–T13 now have focused trace, judge-tracing, prompt, and persisted
+judgment coverage.
 
 The filesystem-root seam is available: setup and agent operations accept an
 injected root, and setup accepts an injected client. The root is exercised by
@@ -306,10 +310,10 @@ spec-required `evaluating-agent` project name.
 Tracing registration is bound to that endpoint/project for the process;
 attempting to register a different target fails explicitly. The setup,
 trace-export, and version-evaluation integration tests use this fixture and
-temporary project roots. The remaining proposed atomic assertions still need
-to be implemented. The current offline suite passes 35 tests; the two live
-tests are deselected without a configured API key.
+temporary project roots. The T11–T13 batch is implemented and validated; the
+offline suite passes 43 tests, with the two live tests deselected because no
+API key is configured.
 
-Until these tests exist and run, they contribute proposed coverage only. A
-test's existence establishes coverage evidence; its pass/fail/skip status is
+For requirements not yet implemented, the listed tests remain proposals.
+Test existence establishes coverage evidence; pass/fail/skip status remains
 a separate result.
