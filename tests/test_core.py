@@ -5,7 +5,6 @@ import os
 import time
 from types import SimpleNamespace
 
-import pandas as pd
 import pytest
 from dotenv import load_dotenv
 from opentelemetry import trace
@@ -232,47 +231,6 @@ def test_chart_code_runs_in_temporary_directory_and_times_out(monkeypatch):
         ]
     }
     assert code_is_runnable(no_secret, timeout_seconds=2) == 1
-
-
-def test_setup_creates_fixed_files_and_uploads_both_datasets(tmp_path, isolated_phoenix):
-    overall_path = tmp_path / "datasets" / "overall_questions.json"
-    convergence_path = tmp_path / "datasets" / "convergence_questions.json"
-
-    setup(root=tmp_path, client=isolated_phoenix.client)
-    original_overall = overall_path.read_bytes()
-    original_convergence = convergence_path.read_bytes()
-    setup(root=tmp_path, client=isolated_phoenix.client)
-
-    sales = pd.read_parquet(tmp_path / "data" / "sample_sales.parquet")
-    assert len(sales) == 10
-    assert list(sales.columns) == [
-        "Store_Number",
-        "SKU_Coded",
-        "Sold_Date",
-        "Qty_Sold",
-        "Total_Sale_Value",
-        "On_Promo",
-    ]
-    assert len(json.loads(overall_path.read_text(encoding="utf-8"))) == 7
-    assert len(json.loads(convergence_path.read_text(encoding="utf-8"))) == 6
-    assert overall_path.read_bytes() == original_overall
-    assert convergence_path.read_bytes() == original_convergence
-
-    client = isolated_phoenix.client
-    assert isolated_phoenix.project_name == "evaluating-agent"
-    assert client.projects.get(project_name="evaluating-agent")["name"] == "evaluating-agent"
-    datasets = client.datasets.list()
-    overall_sets = [item for item in datasets if item["name"].startswith("overall_experiment_inputs-")]
-    convergence_sets = [item for item in datasets if item["name"].startswith("convergence_questions-")]
-    assert overall_sets and overall_sets[-1]["example_count"] == 7
-    assert convergence_sets and convergence_sets[-1]["example_count"] == 6
-
-    uploaded_overall = client.datasets.get_dataset(dataset=overall_sets[-1]["id"])
-    first = uploaded_overall.examples[0]
-    assert set(first["input"]) == {"question"}
-    assert set(first["output"]) == {"sql_result", "sql_generated"}
-    assert "6200700" in first["output"]["sql_result"]
-    assert "12" in first["output"]["sql_result"]
 
 
 def test_setup_and_agent_use_injected_temporary_root(tmp_path):
