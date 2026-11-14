@@ -110,6 +110,8 @@ def main() -> None:
     evaluate_parser = subparsers.add_parser("evaluate")
     evaluate_parser.add_argument("--version", required=True)
     subparsers.add_parser("compare")
+    assurance_parser = subparsers.add_parser("assurance")
+    assurance_parser.add_argument("--snapshot", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "setup":
         setup()
@@ -130,6 +132,13 @@ def main() -> None:
         from .experiments import print_comparison
 
         print_comparison(ROOT)
+    elif args.command == "assurance":
+        from .assurance import export_assurance_snapshot, load_assurance_snapshot
+        from .recording import ensure_phoenix
+
+        snapshot = load_assurance_snapshot(args.snapshot)
+        result = export_assurance_snapshot(snapshot, ensure_phoenix())
+        print(json.dumps(result, indent=2))
 
 # Entry point for the script: guard to ensure that the main function is called when the script is executed directly.
 if __name__ == "__main__":

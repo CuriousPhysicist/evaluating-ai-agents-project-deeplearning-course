@@ -55,6 +55,16 @@ establish that the behavior passed. When comparing QA_CHECK_1 and QA_CHECK_2,
 split grouped rows into individual T requirements before applying equal
 per-requirement weights, unless different weights are explicitly chosen.
 
+#### Initial Phoenix export
+
+The `assurance` command exports explicitly supplied, manually reviewed T1-T21
+snapshots as separate Phoenix experiments. It records individual judgements,
+weights and evidence alongside the weighted aggregate, revision, review time
+and rubric version. This supports later comparisons but does not infer scores,
+run tests, record test outcomes or check regressions. See the README for the
+snapshot format and invocation. The metric and automated evaluation goals
+above therefore remain open.
+
 #### Root-path injection for isolated tests
 
 To keep setup and agent tests from reading or writing repository data, use one
