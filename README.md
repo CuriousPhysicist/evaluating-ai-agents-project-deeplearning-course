@@ -82,5 +82,37 @@ incomplete or the shared dataset is incompatible. A failed export can leave
 a partial experiment in Phoenix; retrying creates a new experiment rather
 than replacing it. Avoid concurrent first-time exports to the same server.
 The data persists in the local Phoenix database; do not include sensitive
-information in snapshots or evidence text. This first pass does not check
-regressions, infer judgements, run tests, or record test outcomes.
+information in snapshots or evidence text.
+
+## Compare reviewed snapshots
+
+With the same local Phoenix server running, select an approved baseline and a
+candidate experiment by the IDs returned when they were exported:
+
+```powershell
+.\.venv\Scripts\python.exe -m agent_evals assurance-compare --baseline <baseline-id> --candidate <candidate-id>
+```
+
+Replace the placeholders with actual IDs (without angle brackets). The
+command reads existing experiments and prints a JSON report; it does not
+start Phoenix, create an experiment, or add a dashboard panel. If Phoenix is
+not running, or either experiment cannot be retrieved, the command fails.
+It uses the same local endpoint configuration as the exporter, including
+`PHOENIX_COLLECTOR_ENDPOINT` when set. Both IDs must refer to that server.
+
+The report includes both commits and review times, weighted scores, the
+aggregate change, and all 21 requirements with their individual changes,
+weights, judgements, evidence references and explanations. Scores and deltas
+use a 0-1 scale; multiply a delta by 100 for percentage points.
+`decreased_requirements` identifies reviews that need attention even when
+improvements elsewhere offset them in the aggregate. A decrease is a review
+warning, not proof of a software regression, and does not by itself make the
+command fail.
+
+Both experiments must contain complete, consistent T1-T21 results from the
+same assurance dataset, use the same supported rubric and identical
+per-requirement weights. Missing or inconsistent data, incompatible
+experiments and connection errors are reported as errors. The comparison
+does not verify that a commit matches the code reviewed, infer judgements,
+run tests, or report test outcomes. Review snapshots against their respective
+revisions and assess test passes, failures and skips separately.

@@ -60,10 +60,12 @@ per-requirement weights, unless different weights are explicitly chosen.
 The `assurance` command exports explicitly supplied, manually reviewed T1-T21
 snapshots as separate Phoenix experiments. It records individual judgements,
 weights and evidence alongside the weighted aggregate, revision, review time
-and rubric version. This supports later comparisons but does not infer scores,
-run tests, record test outcomes or check regressions. See the README for the
-snapshot format and invocation. The metric and automated evaluation goals
-above therefore remain open.
+and rubric version. The separate `assurance-compare` command reads two selected
+experiments, checks their compatibility and reports per-requirement decreases
+for review alongside the aggregate change. It does not infer scores, run tests,
+record test outcomes or prove that a decrease is a software regression. See
+the README for the snapshot format and commands. The metric and automated
+evaluation goals above therefore remain open.
 
 #### Root-path injection for isolated tests
 

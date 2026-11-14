@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import json
+import math
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Literal, TypedDict
 
 from phoenix.client import Client
 from phoenix.client.resources.datasets import Dataset
+from phoenix.client.resources.experiments.types import RanExperiment
 from pydantic import (
     AwareDatetime,
     BaseModel,
     ConfigDict,
     Field,
     StringConstraints,
+    ValidationError,
     model_validator,
 )
 
@@ -90,9 +94,15 @@ def _assurance_dataset(client: Client) -> Dataset:
                 for requirement_id in REQUIREMENT_IDS
             ],
         )
+    _validate_assurance_dataset(dataset)
+    return dataset
+
+
+def _validate_assurance_dataset(dataset: Dataset) -> None:
     inputs = [example["input"] for example in dataset.examples]
     if (
-        len(inputs) != len(REQUIREMENT_IDS)
+        dataset.name != DATASET_NAME
+        or len(inputs) != len(REQUIREMENT_IDS)
         or any(
             not isinstance(item, dict)
             or set(item) != {"requirement_id"}
@@ -102,7 +112,6 @@ def _assurance_dataset(client: Client) -> Dataset:
         or {item["requirement_id"] for item in inputs} != set(REQUIREMENT_IDS)
     ):
         raise RuntimeError(f"Phoenix dataset {DATASET_NAME!r} must contain T1-T21 exactly once")
-    return dataset
 
 
 def export_assurance_snapshot(snapshot: AssuranceSnapshot, client: Client) -> dict[str, str | float]:
@@ -182,4 +191,166 @@ def export_assurance_snapshot(snapshot: AssuranceSnapshot, client: Client) -> di
         "experiment_id": run["experiment_id"],
         "dataset_id": run["dataset_id"],
         "score": snapshot.score,
+    }
+
+
+class ReviewResult(TypedDict):
+    judgement: Judgement
+    score: float
+    evidence_ref: str
+    explanation: str
+
+
+class RequirementComparison(TypedDict):
+    requirement_id: str
+    weight: float
+    baseline: ReviewResult
+    candidate: ReviewResult
+    delta: float
+    status: Literal["decreased", "unchanged", "increased"]
+
+
+class ComparisonReview(TypedDict):
+    experiment_id: str
+    commit: str
+    assessed_at: str
+    score: float
+
+
+class AssuranceComparison(TypedDict):
+    rubric_version: str
+    baseline: ComparisonReview
+    candidate: ComparisonReview
+    aggregate_delta: float
+    decreased_requirements: list[str]
+    requirements: list[RequirementComparison]
+
+
+def _read_persisted_snapshot(client: Client, experiment: RanExperiment) -> AssuranceSnapshot:
+    experiment_id = experiment["experiment_id"]
+    dataset = client.datasets.get_dataset(
+        dataset=experiment["dataset_id"], version_id=experiment["dataset_version_id"]
+    )
+    _validate_assurance_dataset(dataset)
+    example_requirements = {
+        example["id"]: example["input"]["requirement_id"] for example in dataset.examples
+    }
+    task_runs = experiment["task_runs"]
+    evaluations = experiment["evaluation_runs"]
+    if (
+        len(task_runs) != len(REQUIREMENT_IDS)
+        or len(evaluations) != len(REQUIREMENT_IDS)
+        or {run["dataset_example_id"] for run in task_runs} != set(example_requirements)
+        or len({run["id"] for run in task_runs}) != len(REQUIREMENT_IDS)
+        or any(run.get("error") or not isinstance(run["output"], dict) for run in task_runs)
+        or {evaluation.experiment_run_id for evaluation in evaluations} != {run["id"] for run in task_runs}
+    ):
+        raise ValueError(f"Experiment {experiment_id} has incomplete or failed runs")
+
+    evaluations_by_run = {evaluation.experiment_run_id: evaluation for evaluation in evaluations}
+    assessments = []
+    try:
+        for run in task_runs:
+            output = run["output"]
+            if output["requirement_id"] != example_requirements[run["dataset_example_id"]]:
+                raise ValueError("task output does not match its dataset requirement")
+            assessment_data = {key: value for key, value in output.items() if key != "score"}
+            assessment = RequirementAssessment.model_validate(assessment_data)
+            score = JUDGEMENT_SCORES[assessment.judgement]
+            evaluation = evaluations_by_run[run["id"]]
+            if (
+                isinstance(output["score"], bool)
+                or not isinstance(output["score"], (int, float))
+                or output["score"] != score
+                or evaluation.name != "spec_assurance"
+                or evaluation.error
+                or evaluation.result != {
+                    "score": score,
+                    "label": assessment.judgement,
+                    "explanation": assessment.explanation,
+                }
+            ):
+                raise ValueError("stored score or evaluation does not match its judgement")
+            assessments.append(assessment.model_dump())
+        metadata = experiment["experiment_metadata"]
+        snapshot = AssuranceSnapshot.model_validate_json(
+            json.dumps({
+                "rubric_version": metadata["rubric_version"],
+                "commit": metadata["commit"],
+                "assessed_at": metadata["assessed_at"],
+                "requirements": assessments,
+            })
+        )
+        stored_score = metadata["spec_assurance_score"]
+        if (
+            isinstance(stored_score, bool)
+            or not isinstance(stored_score, (int, float))
+            or not math.isclose(stored_score, snapshot.score, rel_tol=1e-12, abs_tol=1e-12)
+        ):
+            raise ValueError("stored aggregate does not match the reviewed scores and weights")
+    except (KeyError, TypeError, ValidationError, ValueError) as error:
+        raise ValueError(f"Experiment {experiment_id} contains invalid assurance data: {error}") from error
+    return snapshot
+
+
+def compare_assurance_experiments(
+    client: Client, baseline_id: str, candidate_id: str
+) -> AssuranceComparison:
+    """Compare two complete, compatible reviewed experiments without modifying Phoenix."""
+    baseline_run = client.experiments.get_experiment(experiment_id=baseline_id)
+    candidate_run = client.experiments.get_experiment(experiment_id=candidate_id)
+    if baseline_run["dataset_id"] != candidate_run["dataset_id"]:
+        raise ValueError("Experiments are not comparable: datasets differ")
+    if baseline_run["experiment_metadata"].get("rubric_version") != candidate_run["experiment_metadata"].get("rubric_version"):
+        raise ValueError("Experiments are not comparable: rubric versions differ")
+    baseline = _read_persisted_snapshot(client, baseline_run)
+    candidate = _read_persisted_snapshot(client, candidate_run)
+    baseline_by_id = {item.requirement_id: item for item in baseline.requirements}
+    candidate_by_id = {item.requirement_id: item for item in candidate.requirements}
+    if any(baseline_by_id[key].weight != candidate_by_id[key].weight for key in REQUIREMENT_IDS):
+        raise ValueError("Experiments are not comparable: requirement weights differ")
+
+    def review(item: RequirementAssessment) -> ReviewResult:
+        return {
+            "judgement": item.judgement,
+            "score": JUDGEMENT_SCORES[item.judgement],
+            "evidence_ref": item.evidence_ref,
+            "explanation": item.explanation,
+        }
+
+    requirements: list[RequirementComparison] = []
+    for requirement_id in REQUIREMENT_IDS:
+        old = baseline_by_id[requirement_id]
+        new = candidate_by_id[requirement_id]
+        old_review, new_review = review(old), review(new)
+        delta = new_review["score"] - old_review["score"]
+        status: Literal["decreased", "unchanged", "increased"] = (
+            "decreased" if delta < 0 else "increased" if delta > 0 else "unchanged"
+        )
+        requirements.append({
+            "requirement_id": requirement_id,
+            "weight": old.weight,
+            "baseline": old_review,
+            "candidate": new_review,
+            "delta": delta,
+            "status": status,
+        })
+
+    return {
+        "rubric_version": baseline.rubric_version,
+        "baseline": {
+            "experiment_id": baseline_id,
+            "commit": baseline.commit,
+            "assessed_at": baseline.assessed_at.isoformat(),
+            "score": baseline.score,
+        },
+        "candidate": {
+            "experiment_id": candidate_id,
+            "commit": candidate.commit,
+            "assessed_at": candidate.assessed_at.isoformat(),
+            "score": candidate.score,
+        },
+        "aggregate_delta": candidate.score - baseline.score,
+        "decreased_requirements": [row["requirement_id"] for row in requirements if row["status"] == "decreased"],
+        "requirements": requirements,
     }

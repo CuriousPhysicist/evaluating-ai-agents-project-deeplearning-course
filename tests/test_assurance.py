@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import json
 import sys
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
@@ -12,6 +13,8 @@ from agent_evals import __main__, assurance, recording
 from agent_evals.assurance import (
     AssuranceSnapshot,
     DATASET_NAME,
+    JUDGEMENT_SCORES,
+    compare_assurance_experiments,
     export_assurance_snapshot,
     load_assurance_snapshot,
 )
@@ -96,6 +99,7 @@ def test_export_rejects_incompatible_dataset(snapshot_data):
     client = Mock()
     client.datasets.list.return_value = [{"name": DATASET_NAME, "id": "existing"}]
     client.datasets.get_dataset.return_value.examples = [{"input": {"requirement_id": "T1"}}]
+    client.datasets.get_dataset.return_value.name = DATASET_NAME
     with pytest.raises(RuntimeError, match="T1-T21 exactly once"):
         export_assurance_snapshot(snapshot(snapshot_data), client)
     client.experiments.run_experiment.assert_not_called()
@@ -107,6 +111,7 @@ def test_export_reports_incomplete_experiment(snapshot_data):
     client.datasets.get_dataset.return_value.examples = [
         {"input": {"requirement_id": f"T{number}"}} for number in range(1, 22)
     ]
+    client.datasets.get_dataset.return_value.name = DATASET_NAME
     client.experiments.run_experiment.return_value = {
         "experiment_id": "failed",
         "task_runs": [],
@@ -121,6 +126,7 @@ def test_export_reports_incomplete_persisted_experiment(snapshot_data):
     client.datasets.list.return_value = [{"name": DATASET_NAME, "id": "existing"}]
     dataset = client.datasets.get_dataset.return_value
     dataset.id = "existing"
+    dataset.name = DATASET_NAME
     dataset.examples = [{"input": {"requirement_id": f"T{number}"}} for number in range(1, 22)]
     client.experiments.run_experiment.return_value = {
         "experiment_id": "incomplete",
@@ -178,3 +184,135 @@ def test_export_persists_two_independent_snapshots(snapshot_data, tmp_path, isol
         assert t1_run["output"]["weight"] == data["requirements"][0]["weight"]
         assert t1_eval.result["label"] == data["requirements"][0]["judgement"]
         assert t1_eval.result["explanation"] == data["requirements"][0]["explanation"]
+
+    with pytest.raises(ValueError, match="weights differ"):
+        compare_assurance_experiments(client, first["experiment_id"], second["experiment_id"])
+
+
+@pytest.fixture
+def comparison_client(snapshot_data):
+    def experiment(data, experiment_id):
+        reviewed = snapshot(data)
+        tasks = []
+        evaluations = []
+        for item in reviewed.requirements:
+            run_id = f"{experiment_id}-{item.requirement_id}"
+            score = JUDGEMENT_SCORES[item.judgement]
+            tasks.append({
+                "id": run_id,
+                "dataset_example_id": item.requirement_id,
+                "output": {**item.model_dump(), "score": score},
+            })
+            evaluations.append(SimpleNamespace(
+                experiment_run_id=run_id,
+                name="spec_assurance",
+                error=None,
+                result={"score": score, "label": item.judgement, "explanation": item.explanation},
+            ))
+        return {
+            "experiment_id": experiment_id,
+            "dataset_id": "dataset",
+            "dataset_version_id": "version",
+            "experiment_metadata": {
+                "rubric_version": reviewed.rubric_version,
+                "commit": reviewed.commit,
+                "assessed_at": reviewed.assessed_at.isoformat(),
+                "spec_assurance_score": reviewed.score,
+            },
+            "task_runs": tasks,
+            "evaluation_runs": evaluations,
+        }
+
+    baseline_data = copy.deepcopy(snapshot_data)
+    baseline_data["requirements"][1]["judgement"] = "mostly_covered"
+    candidate_data = copy.deepcopy(snapshot_data)
+    candidate_data["commit"] = "b" * 40
+    candidate_data["requirements"][0].update(
+        judgement="mostly_covered", evidence_ref="new-review.md#T1", explanation="New gap."
+    )
+    baseline = experiment(baseline_data, "baseline")
+    candidate = experiment(candidate_data, "candidate")
+    client = Mock()
+    client.experiments.get_experiment.side_effect = lambda *, experiment_id: {
+        "baseline": baseline, "candidate": candidate,
+    }[experiment_id]
+    dataset = client.datasets.get_dataset.return_value
+    dataset.name = DATASET_NAME
+    dataset.examples = [
+        {"id": f"T{number}", "input": {"requirement_id": f"T{number}"}}
+        for number in range(1, 22)
+    ]
+    return client, baseline, candidate
+
+
+def test_comparison_reports_decrease_even_when_aggregate_is_unchanged(comparison_client):
+    client, _, _ = comparison_client
+    result = compare_assurance_experiments(client, "baseline", "candidate")
+    assert result["aggregate_delta"] == 0
+    assert result["decreased_requirements"] == ["T1"]
+    assert len(result["requirements"]) == 21
+    assert result["requirements"][0]["delta"] == -0.25
+    assert result["requirements"][0]["candidate"]["evidence_ref"] == "new-review.md#T1"
+    assert result["requirements"][1]["status"] == "increased"
+    assert result["baseline"]["commit"] == "a" * 40
+    client.experiments.run_experiment.assert_not_called()
+    client.datasets.create_dataset.assert_not_called()
+
+
+def test_comparison_uses_matching_nonuniform_weights(comparison_client):
+    client, baseline, candidate = comparison_client
+    for run in (baseline, candidate):
+        run["task_runs"][0]["output"]["weight"] = 2
+    baseline["experiment_metadata"]["spec_assurance_score"] = 21.75 / 22
+    candidate["experiment_metadata"]["spec_assurance_score"] = 21.5 / 22
+    result = compare_assurance_experiments(client, "baseline", "candidate")
+    assert result["aggregate_delta"] == pytest.approx(-0.25 / 22)
+    assert result["requirements"][0]["weight"] == 2
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        (lambda run: run.update(dataset_id="another"), "datasets differ"),
+        (lambda run: run["experiment_metadata"].update(rubric_version="another"), "rubric versions differ"),
+        (lambda run: run["task_runs"].pop(), "incomplete or failed"),
+        (lambda run: run["task_runs"][0].update(error="task failed"), "incomplete or failed"),
+        (lambda run: setattr(run["evaluation_runs"][0], "error", "evaluation failed"), "invalid assurance data"),
+        (lambda run: run["task_runs"][0]["output"].update(score=1.0), "invalid assurance data"),
+        (lambda run: run["experiment_metadata"].update(spec_assurance_score=0), "invalid assurance data"),
+        (lambda run: run["task_runs"][0]["output"].update(requirement_id="T2"), "invalid assurance data"),
+    ],
+)
+def test_comparison_rejects_incompatible_or_invalid_experiment(comparison_client, change, message):
+    client, _, candidate = comparison_client
+    change(candidate)
+    with pytest.raises(ValueError, match=message):
+        compare_assurance_experiments(client, "baseline", "candidate")
+
+
+def test_comparison_reads_real_phoenix_without_creating_experiments(
+    snapshot_data, isolated_phoenix, monkeypatch, capsys
+):
+    client = isolated_phoenix.client
+    first_data = copy.deepcopy(snapshot_data)
+    first_data["requirements"][1]["judgement"] = "mostly_covered"
+    second_data = copy.deepcopy(snapshot_data)
+    second_data["commit"] = "b" * 40
+    second_data["requirements"][0].update(judgement="mostly_covered", explanation="New gap.")
+    first = export_assurance_snapshot(snapshot(first_data), client)
+    second = export_assurance_snapshot(snapshot(second_data), client)
+    experiments_before = client.experiments.list(dataset_id=first["dataset_id"])
+    capsys.readouterr()
+
+    monkeypatch.setattr(recording, "local_phoenix_client", lambda: client)
+    monkeypatch.setattr(sys, "argv", [
+        "agent_evals", "assurance-compare", "--baseline", first["experiment_id"],
+        "--candidate", second["experiment_id"],
+    ])
+    __main__.main()
+    report = json.loads(capsys.readouterr().out)
+    assert report["decreased_requirements"] == ["T1"]
+    assert report["aggregate_delta"] == 0
+    assert report["requirements"][1]["status"] == "increased"
+    experiments_after = client.experiments.list(dataset_id=first["dataset_id"])
+    assert {item["id"] for item in experiments_after} == {item["id"] for item in experiments_before}
