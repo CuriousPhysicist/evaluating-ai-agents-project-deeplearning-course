@@ -20,19 +20,40 @@ This branch seeks to address this deficiency, in the process developing a suitab
 
 #### Metric development
 
-Key considerations in developing the metrics for assessing Spec Assurance:
+Use the following qualitative judgements and scores for evidence of
+specification coverage:
 
-- Qualitative statements about the evidence of specification coverage should be limited to a small set. For example `Not Verified, Partially Verified, Indirectly verified, Directly Verified`
-- Evidence scores can be asigned to these judgements to convert into a numeric value for evaluation asa a metric.
-- A weighted sum of the evidence values can be used to provide either a fractional or % based measure of the level of assurance that specication requirements have been met.
+| Judgement | Score | Evidence |
+|---|---:|---|
+| Not covered | 0.00 | No relevant test evidence. |
+| Indirectly covered | 0.25 | Related behavior is tested, but the specified behavior could still be wrong. |
+| Partially covered | 0.50 | Some required behavior is directly tested, but significant aspects remain unchecked. |
+| Mostly covered | 0.75 | Most required behavior is directly tested, but a specific gap remains. |
+| Covered completely | 1.00 | All specified aspects have direct test coverage. |
+
+Indirect coverage supports an inference without directly asserting the
+requirement; partial coverage directly asserts at least one aspect while
+leaving others unchecked. For example, QA_CHECK_1 checks T14's aggregate
+router score without checking its individual cases, whereas QA_CHECK_2
+directly checks T10's ten-call limit but not its experiment-level failure
+accounting. The ordering is a practical convention, not a universal measure
+of evidence strength: a strong indirect integration test can provide more
+confidence than a narrow direct test.
+
+These are judgement scores, not measured percentages or probabilities of
+correctness. Use atomic requirements where possible; evidence directness
+could also be recorded separately from completeness for finer assessment.
+A weighted sum can provide a fractional or percentage summary of the
+coverage evidence:
 
 $$
 SpecAssurance (\%) =100\times\frac{\Sigma(Weight_i\times EvidenceScore_i)}{\Sigma Weight_i}
 $$
-- Test coverage metrics and test outcome metrics must be kept seperate.
-
-_other considerations:_
-- Report skipped live tests separately to stop the coverage score looking strong while actually hiding failing or unexecuted tests.
+Keep coverage separate from test outcomes. Report passes, failures, and skips
+separately, including skipped live tests: the existence of a test does not
+establish that the behavior passed. When comparing QA_CHECK_1 and QA_CHECK_2,
+split grouped rows into individual T requirements before applying equal
+per-requirement weights, unless different weights are explicitly chosen.
 
 #### Root-path injection for isolated tests
 
