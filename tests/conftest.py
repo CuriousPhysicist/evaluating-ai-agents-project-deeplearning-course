@@ -8,6 +8,7 @@ import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterator
 
 import pytest
 from opentelemetry import trace
@@ -51,7 +52,7 @@ def _cleanup_temporary_directory(directory: tempfile.TemporaryDirectory[str]) ->
 
 
 @pytest.fixture(scope="session")
-def isolated_phoenix() -> IsolatedPhoenix:
+def isolated_phoenix() -> Iterator[IsolatedPhoenix]:
     port, grpc_port = _available_ports()
     temporary_directory = tempfile.TemporaryDirectory(prefix="agent-evals-phoenix-")
     root = Path(temporary_directory.name)
