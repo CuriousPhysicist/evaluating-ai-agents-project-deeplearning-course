@@ -13,10 +13,13 @@ from typing import Any, Protocol
 import duckdb
 import pandas as pd
 from dotenv import load_dotenv
+from openinference.semconv.trace import SpanAttributes
 from pydantic import BaseModel, ValidationError
 from opentelemetry import trace
 
-ROOT = Path(__file__).resolve().parents[1]
+from .paths import DEFAULT_ROOT, resolve_root
+
+ROOT = DEFAULT_ROOT
 TOOL_DEFINITIONS = [
     {
         "type": "function",
@@ -114,8 +117,8 @@ class AgentSettings:
     tool_descriptions: dict[str, str] | None = None
 
     @classmethod
-    def load(cls, name: str) -> AgentSettings:
-        path = ROOT / "versions" / f"{name}.json"
+    def load(cls, name: str, root: Path | None = None) -> AgentSettings:
+        path = resolve_root(root) / "versions" / f"{name}.json"
         raw = json.loads(path.read_text(encoding="utf-8"))
         if raw.get("name") != name or not re.fullmatch(r"[A-Za-z0-9_-]+", name):
             raise ValueError(f"Invalid version file: {path}")
@@ -152,26 +155,33 @@ def get_tool_definitions(settings: AgentSettings) -> list[dict[str, Any]]:
 
 
 # Skills / Tools block: these are the functions that the agent can call to perform specific tasks. Each function takes in a prompt and returns a string result. The agent will use these functions to look up data, analyze it, and generate visualizations based on user queries.
-def lookup_sales_data(prompt: str, settings: AgentSettings, provider: ChatProvider) -> str:
+def lookup_sales_data(
+    prompt: str,
+    settings: AgentSettings,
+    provider: ChatProvider,
+    *,
+    root: Path | None = None,
+) -> str:
+    sample_path = resolve_root(root) / "data" / "sample_sales.parquet"
     tracer = trace.get_tracer("agent_evals")
-    with tracer.start_as_current_span("lookup_sales_data"):
-        try:
-            columns = ", ".join(pd.read_parquet(ROOT / "data" / "sample_sales.parquet").columns)
-            sql_prompt = f"{settings.sql_generation_prompt}\n{prompt}\nAvailable columns: {columns}\nTable: sales"
-            response = _complete(
-                provider,
-                model=settings.agent_model,
-                messages=[{"role": "user", "content": sql_prompt}],
-            )
-            sql = _clean_fences(response.content or "", "sql")
-            with tracer.start_as_current_span("execute_sql_query"):
-                frame = pd.read_parquet(ROOT / "data" / "sample_sales.parquet")
-                with duckdb.connect() as connection:
-                    connection.register("sample_sales", frame)
-                    connection.execute("CREATE TABLE sales AS SELECT * FROM sample_sales")
-                    return connection.execute(sql).df().to_string(index=False)
-        except Exception as error:
-            return f"Error accessing data: {error}"
+    try:
+        columns = ", ".join(pd.read_parquet(sample_path).columns)
+        sql_prompt = f"{settings.sql_generation_prompt}\n{prompt}\nAvailable columns: {columns}\nTable: sales"
+        response = _complete(
+            provider,
+            model=settings.agent_model,
+            messages=[{"role": "user", "content": sql_prompt}],
+        )
+        sql = _clean_fences(response.content or "", "sql")
+        with tracer.start_as_current_span("execute_sql_query") as span:
+            span.set_attribute(SpanAttributes.INPUT_VALUE, sql)
+            frame = pd.read_parquet(sample_path)
+            with duckdb.connect() as connection:
+                connection.register("sample_sales", frame)
+                connection.execute("CREATE TABLE sales AS SELECT * FROM sample_sales")
+                return connection.execute(sql).df().to_string(index=False)
+    except Exception as error:
+        return f"Error accessing data: {error}"
 
 
 def analyze_sales_data(data: str, prompt: str, settings: AgentSettings, provider: ChatProvider) -> str:
@@ -223,8 +233,10 @@ def run_agent(
     *,
     provider: ChatProvider | None = None,
     max_router_calls: int = 10,
+    root: Path | None = None,
 ) -> dict[str, Any]:
-    settings = AgentSettings.load(version)
+    root = resolve_root(root)
+    settings = AgentSettings.load(version, root=root)
     provider = provider or OpenAIProvider()
     tools = get_tool_definitions(settings)
     messages: list[dict[str, Any]] = [{"role": "user", "content": question}]
@@ -266,7 +278,7 @@ def run_agent(
                     calls.append({"name": name, "arguments": arguments})
                     with tracer.start_as_current_span(name):
                         if name == "lookup_sales_data":
-                            result = lookup_sales_data(arguments["prompt"], settings, provider)
+                            result = lookup_sales_data(arguments["prompt"], settings, provider, root=root)
                         elif name == "analyze_sales_data":
                             result = analyze_sales_data(arguments["data"], arguments["prompt"], settings, provider)
                         elif name == "generate_visualization":

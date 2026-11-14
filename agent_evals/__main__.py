@@ -4,12 +4,15 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 import duckdb
 import pandas as pd
 
+from .paths import DEFAULT_ROOT, resolve_root
+
 # Definition of constants and global variables:
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = DEFAULT_ROOT
 SAMPLE_ROWS = [
     (1320, 6200700, "2021-11-01", 2, 10.00, 1),
     (1320, 6200800, "2021-11-01", 1, 4.50, 0),
@@ -49,9 +52,10 @@ def _write_json_if_missing(path: Path, value: object) -> None:
         path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
 
-def setup() -> None:
-    """Create the sample data, datasets, and version files, then upload test sets to Phoenix."""
-    data_path = ROOT / "data" / "sample_sales.parquet"
+def setup(root: Path | None = None, *, client: Any | None = None) -> None:
+    """Create project files and upload test sets using the supplied or local recording client."""
+    root = resolve_root(root)
+    data_path = root / "data" / "sample_sales.parquet"
     if not data_path.exists():
         data_path.parent.mkdir(parents=True, exist_ok=True)
         frame = pd.DataFrame(
@@ -61,7 +65,7 @@ def setup() -> None:
         frame["Sold_Date"] = pd.to_datetime(frame["Sold_Date"]).dt.date
         frame.to_parquet(data_path, index=False)
 
-    overall_path = ROOT / "datasets" / "overall_questions.json"
+    overall_path = root / "datasets" / "overall_questions.json"
     if not overall_path.exists():
         frame = pd.read_parquet(data_path)
         with duckdb.connect() as connection:
@@ -78,19 +82,20 @@ def setup() -> None:
         _write_json_if_missing(overall_path, cases)
 
     _write_json_if_missing(
-        ROOT / "datasets" / "convergence_questions.json",
+        root / "datasets" / "convergence_questions.json",
         [{"question": question} for question in SIMILAR_QUESTIONS],
     )
-    _write_json_if_missing(ROOT / "versions" / "v1.json", {"name": "v1"})
+    _write_json_if_missing(root / "versions" / "v1.json", {"name": "v1"})
     _write_json_if_missing(
-        ROOT / "versions" / "v2.json",
+        root / "versions" / "v2.json",
         {"name": "v2", "overrides": {"sql_generation_prompt": SQL_PROMPT + "\nThink before you respond."}},
     )
-    (ROOT / "results").mkdir(exist_ok=True)
+    (root / "results").mkdir(exist_ok=True)
     from .recording import ensure_phoenix, upload_testsets
 
-    client = ensure_phoenix()
-    names = upload_testsets(client, ROOT)
+    if client is None:
+        client = ensure_phoenix()
+    names = upload_testsets(client, root)
     print(f"Uploaded Phoenix datasets: {names[0]}, {names[1]}")
 
 
