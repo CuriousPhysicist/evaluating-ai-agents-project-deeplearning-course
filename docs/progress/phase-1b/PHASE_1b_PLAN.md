@@ -1,3 +1,9 @@
+---
+title: "Phase 1b: Pytest Integration & Automation"
+parent: Phase 1b
+grand_parent: Progress records
+---
+
 # Phase 1b: Pytest Integration & Automation
 
 **Date:** 16 November 2026  
@@ -117,8 +123,8 @@ Phase 1b builds on Phase 1a's generic compliance scoring engine by:
 
 ### Commit 5: Document pytest integration & CI/CD usage
 **Files:**
-- `qa_information/PHASE_1b_PYTEST_INTEGRATION.md` - Technical guide
-- `qa_information/PHASE_1b_CI_CD_SETUP.md` - CI/CD examples
+- `docs/progress/phase-1b/PHASE_1b_PYTEST_INTEGRATION.md` - Technical guide
+- `docs/progress/phase-1b/PHASE_1b_CI_CD_SETUP.md` - CI/CD examples
 - `README_COMPLIANCE.md` - User-facing compliance guide
 
 **Description:**

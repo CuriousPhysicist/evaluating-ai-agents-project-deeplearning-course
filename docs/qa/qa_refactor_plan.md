@@ -1,3 +1,9 @@
+---
+title: "QA refactor plan"
+parent: QA reviews
+nav_order: 6
+---
+
 ## Plan for the branch development.
 
 ### WHY: Reason for branch development.
@@ -20,13 +26,13 @@ This branch seeks to address this deficiency, in the process developing a suitab
   Assurance score below. Scores are review judgements, not test results or
   probabilities of correctness.
 - **Historical comparison:** Archived the original harness as non-executable
-  text in [old_test_files](../old_test_files/). The
-  [granular comparison](./score_comparison_2.md), using equal weights,
+  text in [old_test_files](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/tree/main/old_test_files). The
+  [granular comparison](score_comparison_2.md), using equal weights,
   estimates **42.86% historically** versus **90.48% reassessed**, an increase
   of **47.62 percentage points**.
 - **Phoenix:** Added commands to export manually reviewed snapshots and
   compare two selected experiments. The comparison flags individual decreases
-  even when the aggregate is unchanged. See the [README](../README.md) for
+  even when the aggregate is unchanged. See the [README](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course#readme) for
   usage.
 - **Validation:** The latest offline run passed **94 tests**, with **2 live
   tests deselected**. Phoenix integration tests use an isolated server.
@@ -151,12 +157,14 @@ provided path or the repository default.
 
 ---
 
+<a id="qa-progress-2026-11-17"></a>
 ## 🎉 Progress assessment against desired outcomes — 17 November 2026
 
 **Status Update:** All three desired outcomes are now **✅ COMPLETE**
 
 Based on implementation of Phase 1a (generic scoring engine) and Phase 1b (pytest integration & automation).
 
+<a id="qa-metric-development"></a>
 ### 1. **Metric Development — ✅ COMPLETE & EXCEEDED (100%)**
 
 **Previous Status (15 Nov):** "Mostly done, not yet a measurement tool (about 70%)"
@@ -179,6 +187,7 @@ Based on implementation of Phase 1a (generic scoring engine) and Phase 1b (pytes
 
 **Key Improvement:** Metric is now **automated** (not manual review only). Scoring derives from test outcomes, enabling repeatable, deterministic measurement.
 
+<a id="qa-automated-evaluation"></a>
 ### 2. **Automated Evaluation — ✅ COMPLETE & EXCEEDED (100%)**
 
 **Previous Status (15 Nov):** "Early stage (about 30–40%)"  
@@ -225,6 +234,7 @@ Reports & CLI output (automated)
 
 **Gap Resolution:** 30-40% → **100%** automated (60-70 percentage point improvement)
 
+<a id="qa-test-suite-refactored"></a>
 ### 3. **Test Suite Refactored & Extended — ✅ COMPLETE (100%)**
 
 **Previous Status (15 Nov):** "Largely done (90%) but unmapped to requirements"

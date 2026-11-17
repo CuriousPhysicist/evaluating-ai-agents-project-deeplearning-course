@@ -1,3 +1,9 @@
+---
+title: "Phase 1a: Generic Compliance Scoring Engine - COMPLETE"
+parent: Phase 1a
+grand_parent: Progress records
+---
+
 # Phase 1a: Generic Compliance Scoring Engine - COMPLETE ✅
 
 **Date Completed:** 16 November 2026  
@@ -331,10 +337,10 @@ if delta < 0:
 
 ### For Using the Scorer
 - See: `examples/spec_assurance_example.py`
-- Read: `qa_information/PHASE_1_IMPLEMENTATION.md`
+- Read: `docs/progress/phase-1a/PHASE_1_IMPLEMENTATION.md`
 
 ### For Understanding Design
-- Read: `qa_information/Phase_1_Scoring_Architecture.md`
+- Read: `docs/design/Phase_1_Scoring_Architecture.md`
 - Reference: `requirements/schema.json` (spec format)
 - Reference: `requirements/t1-t21-spec.yaml` (example spec)
 

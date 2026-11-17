@@ -1,3 +1,9 @@
+---
+title: "Quick Reference: Phase 1a Implementation"
+parent: Phase 1a
+grand_parent: Progress records
+---
+
 # Quick Reference: Phase 1a Implementation
 
 **Status:** ✅ COMPLETE - Ready for staging and commit  
@@ -295,8 +301,8 @@ pytest --no-cov
 
 | Topic | Document |
 |-------|----------|
-| **Architecture** | `qa_information/Phase_1_Scoring_Architecture.md` |
-| **Implementation Details** | `qa_information/PHASE_1_IMPLEMENTATION.md` |
+| **Architecture** | `docs/design/Phase_1_Scoring_Architecture.md` |
+| **Implementation Details** | `docs/progress/phase-1a/PHASE_1_IMPLEMENTATION.md` |
 | **Completion Summary** | `PHASE_1_COMPLETION_SUMMARY.md` |
 | **Verification Checklist** | `PHASE_1_CHECKLIST.md` |
 | **Usage Examples** | `examples/spec_assurance_example.py` |

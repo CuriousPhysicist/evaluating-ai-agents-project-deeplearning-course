@@ -1,15 +1,21 @@
+---
+title: "QA check 1 (granular)"
+parent: QA reviews
+nav_order: 2
+---
+
 # QA Check 1, revised: Individual T Requirements vs. Historical Test Harness
 
 ## Scope and method
 
-This is a more granular reassessment of [QA_CHECK_1](./QA_CHECK_1.md), not a
+This is a more granular reassessment of [QA_CHECK_1](QA_CHECK_1.md), not a
 replacement for that historical document. It examines the archived harness
 from commit `77483a50e596b0dc30cdb598627fb625691db7f6` against each T row
-of the [specification](../evaluating-ai-agents-spec-62ab422.md). The archive
+of the [specification](../spec/evaluating-ai-agents-spec-62ab422.md). The archive
 contains 11 offline tests and two live tests. The historical tests were
 **inspected, not rerun**, for this review.
 
-Scores use the rubric in [qa_refactor_plan.md](./qa_refactor_plan.md):
+Scores use the rubric in [qa_refactor_plan.md](qa_refactor_plan.md):
 not covered = 0, indirectly covered = 0.25, partially covered = 0.5,
 mostly covered = 0.75, and covered completely = 1. A direct assertion of
 only one specified aspect can support a partial score; exercising a case or
@@ -17,9 +23,9 @@ returning a scripted value alone is not an assertion. Scores describe
 coverage evidence, not test outcomes or the probability of correctness.
 
 In the table, test names refer to the
-[archived test harness](../old_test_files/tests/test_core.py.txt).
-The [historical stand-in](../old_test_files/agent_evals/scripted.py.txt) and
-[setup definitions](../old_test_files/agent_evals/__main__.py.txt) provide
+[archived test harness](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/old_test_files/tests/test_core.py.txt).
+The [historical stand-in](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/old_test_files/agent_evals/scripted.py.txt) and
+[setup definitions](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/old_test_files/agent_evals/__main__.py.txt) provide
 context; their existence is not itself test coverage.
 
 ## Coverage by spec condition
@@ -66,7 +72,7 @@ requirement satisfied; equal weighting also does not account for differences
 in importance or the number of assertions within each T row.
 
 This differs from the preliminary **45.24%** in
-[score_comparison_1.md](./score_comparison_1.md). The reassessment applies
+[score_comparison_1.md](score_comparison_1.md). The reassessment applies
 the distinction between indirect evidence and direct assertion separately
 to every T row. Notably, T10, T18 and T21 are now indirect; T14 and T16 are
 partial because their specified aggregate means are directly asserted; and

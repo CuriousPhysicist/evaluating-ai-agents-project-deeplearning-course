@@ -1,3 +1,9 @@
+---
+title: "Phase 1 scoring architecture"
+parent: Design
+nav_order: 1
+---
+
 # Phase 1: Automated Scoring Architecture
 ## Design Decision: Generic vs. T1-T21-Specific Implementation
 

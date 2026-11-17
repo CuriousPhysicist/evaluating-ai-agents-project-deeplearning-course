@@ -1,3 +1,9 @@
+---
+title: "Phase 1a Implementation - Final Summary Report"
+parent: Phase 1a
+grand_parent: Progress records
+---
+
 # Phase 1a Implementation - Final Summary Report
 
 **Date:** 16 November 2026  
@@ -93,13 +99,13 @@ Five independently testable modules:
 
 ### 4. Documentation
 
-- **`qa_information/Phase_1_Scoring_Architecture.md`**
+- **`docs/design/Phase_1_Scoring_Architecture.md`**
   - Architecture decision rationale
   - Design principles
   - Implementation phases
   - Benefits and trade-offs
 
-- **`qa_information/PHASE_1_IMPLEMENTATION.md`**
+- **`docs/progress/phase-1a/PHASE_1_IMPLEMENTATION.md`**
   - How the system works
   - Component descriptions
   - Usage examples
@@ -428,19 +434,19 @@ These are not bugs, but deliberate scope boundaries:
 ## 📞 For Questions
 
 ### "How do I use this?"
-See: [`examples/spec_assurance_example.py`](examples/spec_assurance_example.py)
+See: [`examples/spec_assurance_example.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/examples/spec_assurance_example.py)
 
 ### "How does it work?"
-See: [`qa_information/PHASE_1_IMPLEMENTATION.md`](qa_information/PHASE_1_IMPLEMENTATION.md)
+See: [`PHASE_1_IMPLEMENTATION.md`](PHASE_1_IMPLEMENTATION.md)
 
 ### "Why was it designed this way?"
-See: [`qa_information/Phase_1_Scoring_Architecture.md`](qa_information/Phase_1_Scoring_Architecture.md)
+See: [`Phase_1_Scoring_Architecture.md`](../../design/Phase_1_Scoring_Architecture.md)
 
 ### "Is everything complete?"
 See: [`PHASE_1_CHECKLIST.md`](PHASE_1_CHECKLIST.md)
 
 ### "What about tests?"
-See: [`tests/test_spec_assurance.py`](tests/test_spec_assurance.py)
+See: [`tests/test_spec_assurance.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/test_spec_assurance.py)
 
 ---
 

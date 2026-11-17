@@ -1,3 +1,9 @@
+---
+title: "Pytest Plugin Loading: Issue & Resolution"
+parent: Phase 1b
+grand_parent: Progress records
+---
+
 # Pytest Plugin Loading: Issue & Resolution
 
 **Date:** 2026-11-16  

@@ -1,5 +1,5 @@
 # T1-T21 Specification Requirements
-# Source: evaluating-ai-agents-spec-62ab422.md
+# Source: docs/spec/evaluating-ai-agents-spec-62ab422.md
 # Version: 1.0
 # Created: 2026-11-16
 # Description: T1 through T21 compliance requirements for the evaluating-ai-agents project
@@ -8,7 +8,7 @@ metadata:
   version: "1.0"
   description: "T1-T21 requirements from evaluating-ai-agents specification"
   created: "2026-11-16"
-  source: "evaluating-ai-agents-spec-62ab422.md"
+  source: "docs/spec/evaluating-ai-agents-spec-62ab422.md"
 
 requirements:
   - id: T1

@@ -1,9 +1,15 @@
+---
+title: "Score comparison 2"
+parent: QA reviews
+nav_order: 5
+---
+
 ## Updated score comparison: granular QA_CHECK_1 and QA_CHECK_2
 
 This comparison uses one equally weighted score for each of T1–T21. Historical
-scores come from [QA_CHECK_1_granular.md](./QA_CHECK_1_granular.md), based on
+scores come from [QA_CHECK_1_granular.md](QA_CHECK_1_granular.md), based on
 the archived 11-test harness at commit `77483a5`. The QA_CHECK_2 column
-translates the descriptions in [QA_CHECK_2.md](./QA_CHECK_2.md) directly to
+translates the descriptions in [QA_CHECK_2.md](QA_CHECK_2.md) directly to
 the agreed scale. The reassessed column applies that scale after inspecting
 the current assertions; differences are explained below.
 
@@ -47,7 +53,7 @@ Using the proposed formula, $100 \times \sum score_i / 21$:
 | Current assertions reassessed | 42.86% | 90.48% | +47.62 percentage points |
 
 The differences are calculated before rounding. This supersedes the
-preliminary figures in [score_comparison_1.md](./score_comparison_1.md)
+preliminary figures in [score_comparison_1.md](score_comparison_1.md)
 for this comparison; that file remains a record of the earlier judgement.
 
 ### Reasons for reassessing current evidence

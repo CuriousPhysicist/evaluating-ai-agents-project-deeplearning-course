@@ -1,3 +1,9 @@
+---
+title: "QA check 1"
+parent: QA reviews
+nav_order: 1
+---
+
 # QA Check 1: Spec Requirements vs. Test Harness
 
 ## Summary
@@ -37,5 +43,5 @@ The spec says tests should use a temporary working directory, whereas the setup 
 
 ## References
 
-- Test harness: [`tests/test_core.py`](./tests/test_core.py)
-- Spec test table: [`evaluating-ai-agents-spec-62ab422.md`](./evaluating-ai-agents-spec-62ab422.md)
+- Test harness: [`tests/test_core.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/test_core.py)
+- Spec test table: [`evaluating-ai-agents-spec-62ab422.md`](../spec/evaluating-ai-agents-spec-62ab422.md)

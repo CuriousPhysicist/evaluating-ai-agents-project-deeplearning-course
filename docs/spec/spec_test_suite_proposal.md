@@ -1,8 +1,14 @@
+---
+title: "Proposed T1-T21 test suite"
+parent: Specification
+nav_order: 3
+---
+
 # Proposed atomic pytest suite for T1–T21
 
 This is a test-design document, not a claim that the proposed tests have been
 implemented or run. It translates each T-row in
-[`evaluating-ai-agents-spec-62ab422.md`](../evaluating-ai-agents-spec-62ab422.md)
+[`evaluating-ai-agents-spec-62ab422.md`](evaluating-ai-agents-spec-62ab422.md)
 into independently checkable assertions. Keep each numbered assertion as a
 separate pytest test (or a parametrized case for the same behavior), so a
 partial pass cannot hide a missed requirement.
@@ -49,7 +55,7 @@ def test_t04_executes_both_calls_in_reply_in_order():
 ```
 
 The test names below are proposed names. Several behaviors are partly covered
-in [`tests/test_core.py`](../tests/test_core.py); the list emphasizes the
+in [`tests/test_core.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/test_core.py); the list emphasizes the
 assertions needed to establish the whole spec requirement without relying on
 an aggregate-only check.
 
@@ -286,10 +292,10 @@ an aggregate-only check.
 
 ## Current gaps and test status
 
-[`tests/test_core.py`](../tests/test_core.py) now has focused T3–T9 tests for
+[`tests/test_core.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/test_core.py) now has focused T3–T9 tests for
 agent protocol, tool behavior, and visualization safety; it also exercises
 part of T10. T1 and T2 have focused coverage in
-[`tests/test_setup_spec.py`](../tests/test_setup_spec.py): fresh-root files
+[`tests/test_setup_spec.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/test_setup_spec.py): fresh-root files
 and data types, fixed question-set schemas and no-overwrite behavior, version
 and results paths, the isolated required project name, dataset naming, and
 uploaded example schemas and ground truth. Remaining gaps include end-to-end
@@ -301,10 +307,10 @@ coverage.
 The filesystem-root seam is available: setup and agent operations accept an
 injected root, and setup accepts an injected client. The root is exercised by
 `test_setup_and_agent_use_injected_temporary_root` in
-[`tests/test_core.py`](../tests/test_core.py).
+[`tests/test_core.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/test_core.py).
 
 Phoenix-backed tests now share an isolated session fixture in
-[`tests/conftest.py`](../tests/conftest.py). Each pytest process gets a
+[`tests/conftest.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/conftest.py). Each pytest process gets a
 separate loopback server and temporary SQLite database, with the
 spec-required `evaluating-agent` project name.
 Tracing registration is bound to that endpoint/project for the process;

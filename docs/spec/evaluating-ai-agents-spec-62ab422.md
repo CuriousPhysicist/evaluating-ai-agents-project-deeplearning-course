@@ -1,3 +1,9 @@
+---
+title: "Evaluation program spec"
+parent: Specification
+nav_order: 1
+---
+
 # Spec: an evaluation program for a tool-using agent
 
 **What you're building:** a program that tests a tool-using agent (a router that picks among skills): it runs the agent over a fixed set of test questions, records every step of each run, scores the router's tool choices, each skill's output and the path the agent took with separate evaluators, and shows the scores per agent version side by side. By default the agent under test is a sales-data assistant (look up data with SQL, analyze it, write chart code) over a small sample store-sales table, and you see two versions of that agent scored in one table, so you can tell whether a prompt change helped or broke something.

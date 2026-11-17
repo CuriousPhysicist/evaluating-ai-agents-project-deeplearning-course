@@ -1,3 +1,9 @@
+---
+title: "Phase 1b: Pytest Integration & Compliance Tracking"
+parent: Phase 1b
+grand_parent: Progress records
+---
+
 # Phase 1b: Pytest Integration & Compliance Tracking
 
 **Date:** 16 November 2026  
@@ -376,8 +382,8 @@ Planned enhancements:
 
 ## Related Documentation
 
-- [Phase 1a: Generic Compliance Scoring Engine](./PHASE_1_IMPLEMENTATION.md)
-- [Phase 1: Architecture & Design](./Phase_1_Scoring_Architecture.md)
-- [T1-T21 Specification](../requirements/t1-t21-spec.yaml)
-- [Pytest Plugin API](../agent_evals/pytest_plugin.py)
-- [Compliance Reporter API](../agent_evals/compliance_reporter.py)
+- [Phase 1a: Generic Compliance Scoring Engine](../phase-1a/PHASE_1_IMPLEMENTATION.md)
+- [Phase 1: Architecture & Design](../../design/Phase_1_Scoring_Architecture.md)
+- [T1-T21 Specification](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/t1-t21-spec.yaml)
+- [Pytest Plugin API](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/agent_evals/pytest_plugin.py)
+- [Compliance Reporter API](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/agent_evals/compliance_reporter.py)

@@ -1,3 +1,9 @@
+---
+title: "Phase 1b: Pytest Integration & Automation - COMPLETE"
+parent: Phase 1b
+grand_parent: Progress records
+---
+
 # Phase 1b: Pytest Integration & Automation - COMPLETE ✅
 
 **Date Completed:** 16 November 2026  
@@ -387,8 +393,8 @@ The pytest plugin seamlessly integrates with existing tests, automatically colle
 
 ## Related Documentation
 
-- [Phase 1a: Scoring Engine](./PHASE_1_IMPLEMENTATION.md)
-- [Phase 1: Architecture](./Phase_1_Scoring_Architecture.md)
-- [Pytest Integration Guide](./PHASE_1b_PYTEST_INTEGRATION.md)
-- [CI/CD Setup Guide](./PHASE_1b_CI_CD_SETUP.md)
-- [Requirements Specification](../requirements/t1-t21-spec.yaml)
+- [Phase 1a: Scoring Engine](../phase-1a/PHASE_1_IMPLEMENTATION.md)
+- [Phase 1: Architecture](../../design/Phase_1_Scoring_Architecture.md)
+- [Pytest Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)
+- [CI/CD Setup Guide](PHASE_1b_CI_CD_SETUP.md)
+- [Requirements Specification](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/t1-t21-spec.yaml)

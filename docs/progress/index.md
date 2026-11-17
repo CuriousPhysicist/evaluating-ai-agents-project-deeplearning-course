@@ -1,3 +1,10 @@
+---
+title: Progress records
+has_children: true
+nav_order: 5
+permalink: /progress/
+---
+
 # Progress Record Index - Phase 1a & 1b Completion
 
 **Date:** 17 November 2026  
@@ -9,24 +16,24 @@
 ## 🎯 Quick Start
 
 ### For Project Leads
-**Start here:** [PHASE_1_COMPLETION_RECORD.md](./PHASE_1_COMPLETION_RECORD.md) - Executive Summary  
+**Start here:** [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) - Executive Summary<br>
 **Then read:** "Desired Outcomes: Final Status" section  
 **Time:** 10-15 minutes
 
 ### For Code Reviewers
-**Start here:** [PHASE_1_COMPLETION_RECORD.md](./PHASE_1_COMPLETION_RECORD.md) - Verification & Sign-Off  
+**Start here:** [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) - Verification & Sign-Off<br>
 **Then review:** Code quality checklists  
 **Reference:** Phase 1a & 1b index files for implementation details  
 **Time:** 20-30 minutes
 
 ### For Phase 1c Planners
-**Start here:** [PHASE_1_COMPLETION_RECORD.md](./PHASE_1_COMPLETION_RECORD.md) - Remaining Work  
+**Start here:** [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) - Remaining Work<br>
 **Then read:** Recommendations section  
 **Reference:** Previous assessments for context  
 **Time:** 15-20 minutes
 
 ### For Stakeholder Updates
-**Use:** [PHASE_1_COMPLETION_RECORD.md](./PHASE_1_COMPLETION_RECORD.md) - Executive Summary + Key Achievements  
+**Use:** [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) - Executive Summary + Key Achievements<br>
 **Cite:** Quantitative metrics and capability gains  
 **Time:** 5-10 minutes
 
@@ -57,7 +64,7 @@
 - Planning Phase 1c next steps
 - Reviewing metric development rationale
 
-**Link:** [Read qa_refactor_plan.md](./qa_refactor_plan.md#progress-assessment-against-desired-outcomes--17-november-2026)
+**Link:** [Read qa_refactor_plan.md](../qa/qa_refactor_plan.md#qa-progress-2026-11-17)
 
 ---
 
@@ -82,7 +89,7 @@
 - Formal record keeping
 - Quality baseline establishment
 
-**Link:** [Read PHASE_1_COMPLETION_RECORD.md](./PHASE_1_COMPLETION_RECORD.md)
+**Link:** [Read PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md)
 
 ---
 
@@ -92,10 +99,10 @@
 
 | Document | Purpose | Audience |
 |----------|---------|----------|
-| [PHASE_1_INDEX.md](./PHASE_1_INDEX.md) | Phase 1a overview & navigation | Developers, reviewers |
-| [PHASE_1_IMPLEMENTATION.md](./PHASE_1_IMPLEMENTATION.md) | Generic scoring engine details | Developers, architects |
-| [Phase_1_Scoring_Architecture.md](./Phase_1_Scoring_Architecture.md) | Design decisions & rationale | Architects, leads |
-| [examples/spec_assurance_example.py](../examples/spec_assurance_example.py) | Usage examples | All users |
+| [PHASE_1_INDEX.md](phase-1a/PHASE_1_INDEX.md) | Phase 1a overview & navigation | Developers, reviewers |
+| [PHASE_1_IMPLEMENTATION.md](phase-1a/PHASE_1_IMPLEMENTATION.md) | Generic scoring engine details | Developers, architects |
+| [Phase_1_Scoring_Architecture.md](../design/Phase_1_Scoring_Architecture.md) | Design decisions & rationale | Architects, leads |
+| [examples/spec_assurance_example.py](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/examples/spec_assurance_example.py) | Usage examples | All users |
 
 **When to Reference:**
 - Understanding generic scorer design
@@ -109,10 +116,10 @@
 
 | Document | Purpose | Audience |
 |----------|---------|----------|
-| [PHASE_1b_INDEX.md](./PHASE_1b_INDEX.md) | Phase 1b overview & navigation | Developers, reviewers |
-| [PHASE_1b_PYTEST_INTEGRATION.md](./PHASE_1b_PYTEST_INTEGRATION.md) | Pytest plugin usage guide | Users, developers |
-| [PHASE_1b_CI_CD_SETUP.md](./PHASE_1b_CI_CD_SETUP.md) | CI/CD integration guide | DevOps, leads |
-| [PHASE_1b_PLAN.md](./PHASE_1b_PLAN.md) | Planning & design decisions | Architects, leads |
+| [PHASE_1b_INDEX.md](phase-1b/PHASE_1b_INDEX.md) | Phase 1b overview & navigation | Developers, reviewers |
+| [PHASE_1b_PYTEST_INTEGRATION.md](phase-1b/PHASE_1b_PYTEST_INTEGRATION.md) | Pytest plugin usage guide | Users, developers |
+| [PHASE_1b_CI_CD_SETUP.md](phase-1b/PHASE_1b_CI_CD_SETUP.md) | CI/CD integration guide | DevOps, leads |
+| [PHASE_1b_PLAN.md](phase-1b/PHASE_1b_PLAN.md) | Planning & design decisions | Architects, leads |
 
 **When to Reference:**
 - Understanding pytest integration
@@ -128,23 +135,23 @@
 **Status:** Complete ✅  
 **Evidence:** Generic scoring engine, 100% test coverage, automated calculation  
 **Where to Find:** 
-- Overview: [PHASE_1_COMPLETION_RECORD.md - Outcome #1](./PHASE_1_COMPLETION_RECORD.md#-outcome-1-metric-development)
-- Details: [qa_refactor_plan.md - 17 Nov assessment](./qa_refactor_plan.md#1-metric-development--complete--exceeded-100)
+- Overview: [PHASE_1_COMPLETION_RECORD.md - Outcome #1](PHASE_1_COMPLETION_RECORD.md#-outcome-1-metric-development)
+- Details: [qa_refactor_plan.md - 17 Nov assessment](../qa/qa_refactor_plan.md#qa-metric-development)
 
 ### ✅ Outcome #2: Automated Evaluation
 **Status:** Complete ✅  
 **Evidence:** End-to-end pipeline, 100% automated, zero manual steps  
 **Gap Closed:** 30-40% → 100%  
 **Where to Find:**
-- Overview: [PHASE_1_COMPLETION_RECORD.md - Outcome #2](./PHASE_1_COMPLETION_RECORD.md#-outcome-2-automated-evaluation)
-- Details: [qa_refactor_plan.md - 17 Nov assessment](./qa_refactor_plan.md#2-automated-evaluation--complete--exceeded-100)
+- Overview: [PHASE_1_COMPLETION_RECORD.md - Outcome #2](PHASE_1_COMPLETION_RECORD.md#-outcome-2-automated-evaluation)
+- Details: [qa_refactor_plan.md - 17 Nov assessment](../qa/qa_refactor_plan.md#qa-automated-evaluation)
 
 ### ✅ Outcome #3: Test Suite Refactored
 **Status:** Complete ✅  
 **Evidence:** 155 tests, 100% pass rate, 92 explicit T-ID markers  
 **Where to Find:**
-- Overview: [PHASE_1_COMPLETION_RECORD.md - Outcome #3](./PHASE_1_COMPLETION_RECORD.md#-outcome-3-test-suite-refactored--extended)
-- Details: [qa_refactor_plan.md - 17 Nov assessment](./qa_refactor_plan.md#3-test-suite-refactored--extended--complete-100)
+- Overview: [PHASE_1_COMPLETION_RECORD.md - Outcome #3](PHASE_1_COMPLETION_RECORD.md#-outcome-3-test-suite-refactored--extended)
+- Details: [qa_refactor_plan.md - 17 Nov assessment](../qa/qa_refactor_plan.md#qa-test-suite-refactored)
 
 ---
 

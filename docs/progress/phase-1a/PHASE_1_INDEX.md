@@ -1,3 +1,9 @@
+---
+title: "Phase 1a: Generic Compliance Scoring Engine - Implementation Index"
+parent: Phase 1a
+grand_parent: Progress records
+---
+
 # Phase 1a: Generic Compliance Scoring Engine - Implementation Index
 
 **Status:** ✅ **COMPLETE** (Ready for staging and commit)  
@@ -22,7 +28,7 @@
    - Test results
    - Architecture highlights
 
-3. **[qa_information/Phase_1_Scoring_Architecture.md](qa_information/Phase_1_Scoring_Architecture.md)** ← Design decisions (15 min read)
+3. **[Phase_1_Scoring_Architecture.md](../../design/Phase_1_Scoring_Architecture.md)** ← Design decisions (15 min read)
    - Why this approach
    - Architecture decisions
    - Benefits vs tradeoffs
@@ -69,14 +75,14 @@
 | File | Purpose | Read Time |
 |------|---------|-----------|
 | [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | Quick overview | 5 min |
-| [examples/spec_assurance_example.py](examples/spec_assurance_example.py) | Usage examples | 5 min |
-| [qa_information/PHASE_1_IMPLEMENTATION.md](qa_information/PHASE_1_IMPLEMENTATION.md) | How to use | 10 min |
+| [examples/spec_assurance_example.py](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/examples/spec_assurance_example.py) | Usage examples | 5 min |
+| [PHASE_1_IMPLEMENTATION.md](PHASE_1_IMPLEMENTATION.md) | How to use | 10 min |
 
 ### Design Documentation
 
 | File | Purpose | Read Time |
 |------|---------|-----------|
-| [qa_information/Phase_1_Scoring_Architecture.md](qa_information/Phase_1_Scoring_Architecture.md) | Design decisions | 15 min |
+| [Phase_1_Scoring_Architecture.md](../../design/Phase_1_Scoring_Architecture.md) | Design decisions | 15 min |
 | [PHASE_1_COMPLETION_SUMMARY.md](PHASE_1_COMPLETION_SUMMARY.md) | Implementation details | 10 min |
 
 ### Verification Documentation
@@ -250,11 +256,11 @@ Compliance Result (overall + per-requirement scores)
 
 | Topic | Location |
 |-------|----------|
-| **How do I use this?** | [examples/spec_assurance_example.py](examples/spec_assurance_example.py) |
-| **How does it work?** | [qa_information/PHASE_1_IMPLEMENTATION.md](qa_information/PHASE_1_IMPLEMENTATION.md) |
-| **Why was this designed this way?** | [qa_information/Phase_1_Scoring_Architecture.md](qa_information/Phase_1_Scoring_Architecture.md) |
+| **How do I use this?** | [examples/spec_assurance_example.py](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/examples/spec_assurance_example.py) |
+| **How does it work?** | [PHASE_1_IMPLEMENTATION.md](PHASE_1_IMPLEMENTATION.md) |
+| **Why was this designed this way?** | [Phase_1_Scoring_Architecture.md](../../design/Phase_1_Scoring_Architecture.md) |
 | **Is everything complete?** | [PHASE_1_CHECKLIST.md](PHASE_1_CHECKLIST.md) |
-| **What about the tests?** | [tests/test_spec_assurance.py](tests/test_spec_assurance.py) |
+| **What about the tests?** | [tests/test_spec_assurance.py](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/test_spec_assurance.py) |
 
 ---
 

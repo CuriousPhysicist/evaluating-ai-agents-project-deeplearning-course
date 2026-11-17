@@ -1,8 +1,14 @@
+---
+title: "QA check 2"
+parent: QA reviews
+nav_order: 3
+---
+
 # QA Check 2: Spec Requirements vs. Test Harness
 
 ## Summary
 
-The earlier [QA Check 1](./QA_CHECK_1.md) compared the spec with a harness
+The earlier [QA Check 1](QA_CHECK_1.md) compared the spec with a harness
 containing 11 offline tests. The current suite has 65 offline tests, all
 passing; the two live tests are deselected when no API key is configured.
 Test count is not the same as requirement count: several tests exercise more
@@ -53,7 +59,7 @@ no API key was configured.
 
 ## References
 
-- Test harness: [`tests/test_core.py`](../tests/test_core.py),
-  [`tests/test_setup_spec.py`](../tests/test_setup_spec.py)
-- Spec test table: [`evaluating-ai-agents-spec-62ab422.md`](../evaluating-ai-agents-spec-62ab422.md)
-- Atomic test mapping: [`spec_test_suite_proposal.md`](./spec_test_suite_proposal.md)
+- Test harness: [`tests/test_core.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/test_core.py),
+  [`tests/test_setup_spec.py`](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/tests/test_setup_spec.py)
+- Spec test table: [`evaluating-ai-agents-spec-62ab422.md`](../spec/evaluating-ai-agents-spec-62ab422.md)
+- Atomic test mapping: [`spec_test_suite_proposal.md`](../spec/spec_test_suite_proposal.md)

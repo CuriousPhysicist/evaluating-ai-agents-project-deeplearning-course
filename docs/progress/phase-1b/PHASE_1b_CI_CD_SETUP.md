@@ -1,4 +1,10 @@
-# Phase 1b: CI/CD Integration Guide
+---
+title: "Phase 1b: CI/CD Integration Guide"
+parent: Phase 1b
+grand_parent: Progress records
+---
+
+{% raw %}# Phase 1b: CI/CD Integration Guide
 
 **Date:** 16 November 2026  
 **Purpose:** Integrate compliance tracking into CI/CD pipelines  
@@ -537,6 +543,7 @@ python scripts/check_compliance.py ... || exit 1
 
 ## Related Sections
 
-- [Pytest Integration Guide](./PHASE_1b_PYTEST_INTEGRATION.md)
-- [Phase 1a: Scoring Engine](./PHASE_1_IMPLEMENTATION.md)
-- [Requirements Specification](../requirements/t1-t21-spec.yaml)
+- [Pytest Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)
+- [Phase 1a: Scoring Engine](../phase-1a/PHASE_1_IMPLEMENTATION.md)
+- [Requirements Specification](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/t1-t21-spec.yaml)
+{% endraw %}

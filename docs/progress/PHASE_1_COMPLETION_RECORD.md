@@ -1,3 +1,9 @@
+---
+title: "Phase 1 completion record"
+parent: Progress records
+nav_order: 9
+---
+
 # Phase 1a & 1b: Completion Record & Outcomes Assessment
 
 **Date:** 17 November 2026  
@@ -67,8 +73,8 @@
 
 #### 4. Documentation
 
-- `qa_information/Phase_1_Scoring_Architecture.md` - Design decisions
-- `qa_information/PHASE_1_IMPLEMENTATION.md` - Implementation details
+- `docs/design/Phase_1_Scoring_Architecture.md` - Design decisions
+- `docs/progress/phase-1a/PHASE_1_IMPLEMENTATION.md` - Implementation details
 - `examples/spec_assurance_example.py` - Usage examples
 
 ### Key Features Delivered
@@ -175,9 +181,9 @@ Requirements are configuration, not code. Same scoring engine works with any spe
 
 #### 6. Documentation
 
-- `qa_information/PHASE_1b_PYTEST_INTEGRATION.md` - Usage guide
-- `qa_information/PHASE_1b_CI_CD_SETUP.md` - CI/CD integration examples
-- `qa_information/PHASE_1b_PLAN.md` - Design & planning
+- `docs/progress/phase-1b/PHASE_1b_PYTEST_INTEGRATION.md` - Usage guide
+- `docs/progress/phase-1b/PHASE_1b_CI_CD_SETUP.md` - CI/CD integration examples
+- `docs/progress/phase-1b/PHASE_1b_PLAN.md` - Design & planning
 - `PHASE_1b_INDEX.md` - Navigation guide
 
 ### Automation Pipeline

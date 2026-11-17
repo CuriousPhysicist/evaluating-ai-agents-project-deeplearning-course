@@ -1,3 +1,9 @@
+---
+title: "Phase 1b: Pytest Integration - Complete Index"
+parent: Phase 1b
+grand_parent: Progress records
+---
+
 # Phase 1b: Pytest Integration - Complete Index
 
 **Status:** ✅ COMPLETE & READY  
@@ -10,18 +16,18 @@
 ## Quick Navigation
 
 ### For Quick Start
-- **[Phase 1b Completion Summary](./qa_information/PHASE_1b_COMPLETION_SUMMARY.md)** - What was built, statistics, and results
+- **[Phase 1b Completion Summary](PHASE_1b_COMPLETION_SUMMARY.md)** - What was built, statistics, and results
 
 ### For Implementation Details
-- **[Pytest Integration Guide](./qa_information/PHASE_1b_PYTEST_INTEGRATION.md)** - How the plugin works, usage patterns, examples
-- **[Compliance Reporter API](./agent_evals/compliance_reporter.py)** - Report generation code (docstrings)
-- **[Pytest Plugin API](./agent_evals/pytest_plugin.py)** - Plugin implementation (documented code)
+- **[Pytest Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)** - How the plugin works, usage patterns, examples
+- **[Compliance Reporter API](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/agent_evals/compliance_reporter.py)** - Report generation code (docstrings)
+- **[Pytest Plugin API](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/agent_evals/pytest_plugin.py)** - Plugin implementation (documented code)
 
 ### For CI/CD Setup
-- **[CI/CD Integration Guide](./qa_information/PHASE_1b_CI_CD_SETUP.md)** - GitHub Actions, GitLab CI, Jenkins examples
+- **[CI/CD Integration Guide](PHASE_1b_CI_CD_SETUP.md)** - GitHub Actions, GitLab CI, Jenkins examples
 
 ### For Planning & Decision Making
-- **[Phase 1b Plan](./qa_information/PHASE_1b_PLAN.md)** - Original plan, 6 commit structure, decisions made
+- **[Phase 1b Plan](PHASE_1b_PLAN.md)** - Original plan, 6 commit structure, decisions made
 
 ---
 
@@ -249,7 +255,7 @@ compliance-check --fail-if-below
 **Problem:** "FileNotFoundError: Spec file..."
 **Solution:** Ensure spec path is correct: `requirements/t1-t21-spec.yaml`
 
-See **[Pytest Integration Guide](./qa_information/PHASE_1b_PYTEST_INTEGRATION.md)** for more troubleshooting
+See **[Pytest Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)** for more troubleshooting
 
 ---
 
@@ -267,19 +273,19 @@ Planned enhancements:
 ## Documentation Hierarchy
 
 ### Level 1: Quick Start
-→ [Phase 1b Completion Summary](./qa_information/PHASE_1b_COMPLETION_SUMMARY.md)
+→ [Phase 1b Completion Summary](PHASE_1b_COMPLETION_SUMMARY.md)
 → Usage quick reference (this file)
 
 ### Level 2: Implementation
-→ [Pytest Integration Guide](./qa_information/PHASE_1b_PYTEST_INTEGRATION.md)
+→ [Pytest Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)
 → Code docstrings in implementation files
 
 ### Level 3: Advanced
-→ [CI/CD Integration Guide](./qa_information/PHASE_1b_CI_CD_SETUP.md)
+→ [CI/CD Integration Guide](PHASE_1b_CI_CD_SETUP.md)
 → Specific platform configurations
 
 ### Level 4: Planning
-→ [Phase 1b Plan](./qa_information/PHASE_1b_PLAN.md)
+→ [Phase 1b Plan](PHASE_1b_PLAN.md)
 → Design decisions & trade-offs
 
 ---
@@ -303,13 +309,13 @@ Before considering Phase 1b complete, verify:
 ## Related Documents
 
 **Phase 1a (Prerequisite)**
-- [Phase 1a: Scoring Engine](./qa_information/PHASE_1_IMPLEMENTATION.md)
-- [Architecture & Design](./qa_information/Phase_1_Scoring_Architecture.md)
+- [Phase 1a: Scoring Engine](../phase-1a/PHASE_1_IMPLEMENTATION.md)
+- [Architecture & Design](../../design/Phase_1_Scoring_Architecture.md)
 
 **Phase 1b (This Phase)**
-- [Pytest Integration Guide](./qa_information/PHASE_1b_PYTEST_INTEGRATION.md)
-- [CI/CD Setup Guide](./qa_information/PHASE_1b_CI_CD_SETUP.md)
-- [Planning & Design](./qa_information/PHASE_1b_PLAN.md)
+- [Pytest Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)
+- [CI/CD Setup Guide](PHASE_1b_CI_CD_SETUP.md)
+- [Planning & Design](PHASE_1b_PLAN.md)
 
 **Phase 1c (Future)**
 - Coming soon: CI/CD gating, historical tracking, dashboards
@@ -319,10 +325,10 @@ Before considering Phase 1b complete, verify:
 ## Questions?
 
 Refer to the appropriate guide:
-- **"How do I use it?"** → [Integration Guide](./qa_information/PHASE_1b_PYTEST_INTEGRATION.md)
-- **"How do I integrate with CI/CD?"** → [CI/CD Guide](./qa_information/PHASE_1b_CI_CD_SETUP.md)
-- **"Why was it built this way?"** → [Planning Doc](./qa_information/PHASE_1b_PLAN.md)
-- **"What was actually built?"** → [Completion Summary](./qa_information/PHASE_1b_COMPLETION_SUMMARY.md)
+- **"How do I use it?"** → [Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)
+- **"How do I integrate with CI/CD?"** → [CI/CD Guide](PHASE_1b_CI_CD_SETUP.md)
+- **"Why was it built this way?"** → [Planning Doc](PHASE_1b_PLAN.md)
+- **"What was actually built?"** → [Completion Summary](PHASE_1b_COMPLETION_SUMMARY.md)
 - **"Where's the code?"** → Check `agent_evals/` and `tests/` directories
 
 ---

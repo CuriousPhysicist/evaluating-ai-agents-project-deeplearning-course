@@ -1,3 +1,9 @@
+---
+title: "Phase 1a Implementation Checklist"
+parent: Phase 1a
+grand_parent: Progress records
+---
+
 # Phase 1a Implementation Checklist
 
 **Date Completed:** 16 November 2026  
@@ -71,7 +77,7 @@
 
 ## Documentation
 
-- ✅ **qa_information/Phase_1_Scoring_Architecture.md** (9,596 bytes)
+- ✅ **docs/design/Phase_1_Scoring_Architecture.md** (9,596 bytes)
   - Architecture decision rationale
   - Design principles
   - Proposed module structure
@@ -80,7 +86,7 @@
   - Implementation phases
   - Benefits and trade-offs
 
-- ✅ **qa_information/PHASE_1_IMPLEMENTATION.md** (11,159 bytes)
+- ✅ **docs/progress/phase-1a/PHASE_1_IMPLEMENTATION.md** (11,159 bytes)
   - Implementation overview
   - Component descriptions
   - Specification format explanation
@@ -271,4 +277,4 @@ When ready to proceed with Phase 1b, focus on:
 3. ⏳ Historical tracking in Phoenix
 4. ⏳ Automated compliance reporting
 
-See: `qa_information/PHASE_1_IMPLEMENTATION.md` for roadmap
+See: `docs/progress/phase-1a/PHASE_1_IMPLEMENTATION.md` for roadmap

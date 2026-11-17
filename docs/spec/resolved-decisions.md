@@ -1,3 +1,9 @@
+---
+title: "Resolved decisions"
+parent: Specification
+nav_order: 2
+---
+
 # Resolved Decisions
 
 - C1a: The sales-data assistant from this spec. = course choice

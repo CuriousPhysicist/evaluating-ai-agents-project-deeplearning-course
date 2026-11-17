@@ -1,0 +1,24 @@
+title: Agent Evals
+description: Evaluation harness for a tool-using sales assistant
+remote_theme: just-the-docs/just-the-docs
+search_enabled: true
+heading_anchors: true
+
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: default
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+  collections: false
+
+aux_links:
+  "GitHub repository":
+    - https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course

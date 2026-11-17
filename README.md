@@ -2,6 +2,20 @@
 
 A command-line evaluation harness for a tool-using sales assistant. It records agent runs in local Phoenix, evaluates router and skill behavior separately, measures convergence across similar questions, and compares version results.
 
+Project documentation (spec, QA reviews, design, progress records) lives in [docs/](docs/index.md) and is set up for GitHub Pages.
+
+## Documentation preview
+
+Install Ruby and Bundler separately from the Python environment, then run:
+
+```powershell
+cd docs
+bundle install
+bundle exec jekyll serve
+```
+
+Open `http://127.0.0.1:4000`. The remote theme requires internet access when building.
+
 ## Install
 
 From PowerShell in this folder:
@@ -43,7 +57,7 @@ assessment for each of T1 through T21 exactly once:
       "requirement_id": "T1",
       "judgement": "mostly_covered",
       "weight": 1,
-      "evidence_ref": "qa_information/QA_CHECK_2.md#t1",
+      "evidence_ref": "docs/qa/QA_CHECK_2.md#t1",
       "explanation": "Example review rationale; replace with the actual evidence."
     }
   ]
@@ -66,8 +80,8 @@ Use the actual assessment time, not the commit time unless they coincide.
 The supported `qa-evidence-v1` judgements are `not_covered` (0.00),
 `indirectly_covered` (0.25), `partially_covered` (0.50), `mostly_covered`
 (0.75) and `covered_completely` (1.00). Scores are derived from these labels,
-not supplied separately. See `qa_information/qa_refactor_plan.md` for the
-rubric and `qa_information/score_comparison_2.md` for reviewed examples.
+not supplied separately. See `docs/qa/qa_refactor_plan.md` for the
+rubric and `docs/qa/score_comparison_2.md` for reviewed examples.
 
 ```powershell
 .\.venv\Scripts\python.exe -m agent_evals assurance --snapshot .\path\to\review.json

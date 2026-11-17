@@ -22,3 +22,6 @@ htmlcov/
 
 # compliance reporting artifacts
 .compliance_results.json
+# Jekyll
+docs/_site/
+docs/.jekyll-cache/

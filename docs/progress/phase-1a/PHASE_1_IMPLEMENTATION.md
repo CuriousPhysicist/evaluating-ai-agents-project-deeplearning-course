@@ -1,3 +1,9 @@
+---
+title: "Phase 1a Implementation: Generic Compliance Scoring Engine"
+parent: Phase 1a
+grand_parent: Progress records
+---
+
 # Phase 1a Implementation: Generic Compliance Scoring Engine
 
 **Date:** 16 November 2026  
@@ -343,8 +349,8 @@ qa_information/
 
 ## References
 
-- [Phase 1 Architecture Decision](./Phase_1_Scoring_Architecture.md)
-- [QA Refactor Plan](./qa_refactor_plan.md)
-- [T1-T21 Specification YAML](../requirements/t1-t21-spec.yaml)
-- [Requirement Spec JSON Schema](../requirements/schema.json)
-- [Example Usage](../examples/spec_assurance_example.py)
+- [Phase 1 Architecture Decision](../../design/Phase_1_Scoring_Architecture.md)
+- [QA Refactor Plan](../../qa/qa_refactor_plan.md)
+- [T1-T21 Specification YAML](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/t1-t21-spec.yaml)
+- [Requirement Spec JSON Schema](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/schema.json)
+- [Example Usage](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/examples/spec_assurance_example.py)

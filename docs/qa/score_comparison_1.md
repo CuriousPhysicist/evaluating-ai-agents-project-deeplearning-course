@@ -1,3 +1,9 @@
+---
+title: "Score comparison 1"
+parent: QA reviews
+nav_order: 4
+---
+
 ## Score comparison between QA_CHECK_1 and QA_CHECK_2
 
 Using the agreed scale, equal weights and **T1–T21 only**:
