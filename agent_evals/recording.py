@@ -35,6 +35,11 @@ def _local_base_url(endpoint: str | None = None) -> str:
     return f"{parsed.scheme or 'http'}://{parsed.netloc}"
 
 
+def local_phoenix_client() -> Client:
+    """Connect to the configured local Phoenix without starting or modifying it."""
+    return Client(base_url=_local_base_url())
+
+
 def ensure_phoenix(
     *,
     base_url: str | None = None,

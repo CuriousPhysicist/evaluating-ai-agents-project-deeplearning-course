@@ -291,6 +291,8 @@ def _run_o1(tmp_path, provider=None):
 
 
 # block: core tests
+@pytest.mark.T3_tool_arguments
+@pytest.mark.T3_protocol
 def test_t03_records_exact_tool_names_and_arguments(tmp_path):
     record, _ = _run_o1(tmp_path)
     lookup_result = record["tool_responses"][0]["tool_response"]
@@ -310,6 +312,8 @@ def test_t03_records_exact_tool_names_and_arguments(tmp_path):
     ]
 
 
+@pytest.mark.T3_tool_arguments
+@pytest.mark.T3_protocol
 def test_t03_records_tool_response_and_final_output(tmp_path):
     record, provider = _run_o1(tmp_path)
     lookup_result = record["tool_responses"][0]["tool_response"]
@@ -334,12 +338,16 @@ def test_t03_records_tool_response_and_final_output(tmp_path):
     ]
 
 
+@pytest.mark.T3_tool_arguments
+@pytest.mark.T3_protocol
 def test_t03_path_length_equals_message_count(tmp_path):
     record, _ = _run_o1(tmp_path)
 
     assert record["path_length"] == len(record["unchanged_messages"]) == 7
 
 
+@pytest.mark.T4_run_records
+@pytest.mark.T4_ordering
 def test_t04_executes_all_calls_in_reply_order(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = MultiCallSpyProvider()
@@ -384,6 +392,8 @@ def test_t04_executes_all_calls_in_reply_order(tmp_path):
     ]
 
 
+@pytest.mark.T4_run_records
+@pytest.mark.T4_ordering
 def test_t04_appends_tool_replies_before_next_router_call(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = MultiCallSpyProvider()
@@ -403,6 +413,8 @@ def test_t04_appends_tool_replies_before_next_router_call(tmp_path):
     _assert_exact_tool_replies(second_request)
 
 
+@pytest.mark.T4_run_records
+@pytest.mark.T4_ordering
 def test_t04_finishes_after_multi_call_reply(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = MultiCallSpyProvider()
@@ -417,6 +429,8 @@ def test_t04_finishes_after_multi_call_reply(tmp_path):
     assert record["path_length"] == len(record["unchanged_messages"]) == 6
 
 
+@pytest.mark.T5_replies
+@pytest.mark.T5_tool_call_pairing
 def test_t05_every_tool_call_id_has_exactly_one_tool_reply(tmp_path):
     record, _ = _run_o1(tmp_path)
 
@@ -434,6 +448,8 @@ def test_t05_every_tool_call_id_has_exactly_one_tool_reply(tmp_path):
     assert Counter(assistant_call_ids) == Counter(tool_reply_ids)
 
 
+@pytest.mark.T5_replies
+@pytest.mark.T5_tool_call_pairing
 def test_t05_replies_exist_before_next_router_request(tmp_path):
     provider = SimpleO1Provider()
     record, _ = _run_o1(tmp_path, provider)
@@ -442,6 +458,8 @@ def test_t05_replies_exist_before_next_router_request(tmp_path):
     assert provider.router_calls == 3
 
 
+@pytest.mark.T15_sql_evaluator
+@pytest.mark.T15_evaluation
 def test_lookup_evaluator_compares_digits_and_handles_skipped_tool():
     record = {"tool_responses": [{"tool_name": "lookup_sales_data", "tool_response": "6200700 12"}]}
     assert evaluate_sql_result(record, "6200700, 12") == 1
@@ -450,6 +468,8 @@ def test_lookup_evaluator_compares_digits_and_handles_skipped_tool():
     assert evaluate_sql_result(None, "12") == 0
 
 
+@pytest.mark.T13_judge_labels
+@pytest.mark.T13_stored_data
 def test_t13_normalizes_capitalized_punctuated_label():
     record = {
         "question": "Look up total sales",
@@ -462,6 +482,8 @@ def test_t13_normalizes_capitalized_punctuated_label():
     assert correct == {"score": 1.0, "label": "correct", "explanation": "Scripted reason."}
 
 
+@pytest.mark.T13_judge_labels
+@pytest.mark.T13_stored_data
 def test_t13_unmatched_label_scores_zero():
     record = {
         "question": "Look up total sales",
@@ -474,6 +496,8 @@ def test_t13_unmatched_label_scores_zero():
     assert unmatched == {"score": 0.0, "label": "incorrect", "explanation": ""}
 
 
+@pytest.mark.T6_sql_fence
+@pytest.mark.T6_lookup
 def test_t06_removes_sql_fences_before_execution(tmp_path, monkeypatch):
     setup(root=tmp_path, client=SetupClient())
     provider = SimpleO1Provider()
@@ -511,6 +535,8 @@ def test_t06_removes_sql_fences_before_execution(tmp_path, monkeypatch):
     )
 
 
+@pytest.mark.T6_sql_fence
+@pytest.mark.T6_lookup
 def test_t06_lookup_returns_expected_result_without_error(tmp_path):
     record, _ = _run_o1(tmp_path)
     lookup_response = record["tool_responses"][0]["tool_response"]
@@ -520,6 +546,8 @@ def test_t06_lookup_returns_expected_result_without_error(tmp_path):
     assert "12" in lookup_response
 
 
+@pytest.mark.T7_analysis_fallback
+@pytest.mark.T7_error_handling
 def test_t07_v2_sql_failure_is_returned_as_tool_response(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = ScriptedProvider()
@@ -534,6 +562,8 @@ def test_t07_v2_sql_failure_is_returned_as_tool_response(tmp_path):
     assert record["tool_responses"][0]["tool_response"].startswith("Error accessing data:")
 
 
+@pytest.mark.T7_analysis_fallback
+@pytest.mark.T7_error_handling
 def test_t07_agent_produces_error_case_answer_after_lookup_failure(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = ScriptedProvider()
@@ -548,6 +578,8 @@ def test_t07_agent_produces_error_case_answer_after_lookup_failure(tmp_path):
     assert record["path_length"] == 7
 
 
+@pytest.mark.T8_chart_config
+@pytest.mark.T8_chart_execution
 def test_t08_empty_analysis_reply_returns_fallback(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = ScriptedProvider()
@@ -559,6 +591,8 @@ def test_t08_empty_analysis_reply_returns_fallback(tmp_path):
     }
 
 
+@pytest.mark.T9_code_return
+@pytest.mark.T9_no_execution
 def test_t09_chart_code_fences_are_removed_and_code_is_returned(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = ScriptedProvider()
@@ -576,6 +610,8 @@ def test_t09_chart_code_fences_are_removed_and_code_is_returned(tmp_path):
     assert visualization_response == "print(totals_by_store)"
 
 
+@pytest.mark.T9_code_return
+@pytest.mark.T9_no_execution
 def test_t09_agent_does_not_execute_generated_chart_code(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     marker_path = tmp_path / "generated-code-ran.txt"
@@ -587,6 +623,8 @@ def test_t09_agent_does_not_execute_generated_chart_code(tmp_path):
     assert not marker_path.exists()
 
 
+@pytest.mark.T9_code_return
+@pytest.mark.T9_no_execution
 def test_t09_unreadable_config_uses_exact_fallback_fields(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = ChartFallbackProvider()
@@ -603,6 +641,8 @@ def test_t09_unreadable_config_uses_exact_fallback_fields(tmp_path):
     }
 
 
+@pytest.mark.T9_code_return
+@pytest.mark.T9_no_execution
 def test_t09_generated_code_that_would_fail_does_not_fail_agent_run(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = ScriptedProvider()
@@ -616,6 +656,8 @@ def test_t09_generated_code_that_would_fail_does_not_fail_agent_run(tmp_path):
     assert record["final_output"].endswith("print(totals_by_store)")
 
 
+@pytest.mark.T7_analysis_fallback
+@pytest.mark.T7_error_handling
 def test_lookup_error_and_empty_analysis_are_returned_as_tool_results():
     settings = AgentSettings.load("v1")
     error_provider = ErrorProvider()
@@ -625,6 +667,8 @@ def test_lookup_error_and_empty_analysis_are_returned_as_tool_results():
     assert analyze_sales_data("", "Analyze nothing", settings, empty_provider) == "No analysis could be generated"
 
 
+@pytest.mark.T10_call_limit
+@pytest.mark.T10_experiment_failure
 def test_t10_loop_stops_at_ten_router_calls(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     provider = LoopProvider()
@@ -640,6 +684,8 @@ def test_t10_loop_stops_at_ten_router_calls(tmp_path):
     assert provider.router_calls == 10
 
 
+@pytest.mark.T19_convergence
+@pytest.mark.T19_evaluation
 def test_convergence_score_excludes_failed_run_from_optimum():
     optimal, scores, mean = convergence_score([5, 5, 7, None])
     assert optimal == 5
@@ -647,6 +693,8 @@ def test_convergence_score_excludes_failed_run_from_optimum():
     assert round(mean, 2) == 0.68
 
 
+@pytest.mark.T18_chart_timeout
+@pytest.mark.T18_isolation
 def test_t18_infinite_chart_code_times_out():
     looping = {"tool_responses": [{"tool_name": "generate_visualization", "tool_response": "while True: pass"}]}
     started = time.monotonic()
@@ -654,6 +702,8 @@ def test_t18_infinite_chart_code_times_out():
     assert time.monotonic() - started < 10
 
 
+@pytest.mark.T18_chart_timeout
+@pytest.mark.T18_isolation
 def test_t18_chart_code_cannot_write_into_project_directory(tmp_path):
     escape_path = tmp_path / "escape.txt"
     record = {
@@ -669,6 +719,8 @@ def test_t18_chart_code_cannot_write_into_project_directory(tmp_path):
     assert not escape_path.exists()
 
 
+@pytest.mark.T18_chart_timeout
+@pytest.mark.T18_isolation
 def test_t18_valid_o7_chart_code_runs_after_timeout_case(tmp_path):
     setup(root=tmp_path, client=SetupClient())
     looping = {"tool_responses": [{"tool_name": "generate_visualization", "tool_response": "while True: pass"}]}
@@ -683,6 +735,8 @@ def test_t18_valid_o7_chart_code_runs_after_timeout_case(tmp_path):
     assert code_is_runnable(o7_record, timeout_seconds=2) == 1
 
 
+@pytest.mark.T18_chart_timeout
+@pytest.mark.T18_isolation
 def test_chart_code_runs_without_project_api_key(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-only-key")
     no_secret = {
@@ -696,6 +750,8 @@ def test_chart_code_runs_without_project_api_key(monkeypatch):
     assert code_is_runnable(no_secret, timeout_seconds=2) == 1
 
 
+@pytest.mark.T1_setup
+@pytest.mark.T1_project_structure
 def test_setup_and_agent_use_injected_temporary_root(tmp_path):
     client = SetupClient()
     setup(root=tmp_path, client=client)
@@ -778,6 +834,8 @@ def traced_o1_spans(tmp_path, isolated_phoenix):
     return spans, trace_spans, provider
 
 
+@pytest.mark.T11_trace_structure
+@pytest.mark.T11_sql_input
 def test_t11_trace_has_one_agent_run_and_three_router_calls(traced_o1_spans):
     spans, _, _ = traced_o1_spans
     assert spans["context.trace_id"].astype(str).nunique() == 1
@@ -786,6 +844,8 @@ def test_t11_trace_has_one_agent_run_and_three_router_calls(traced_o1_spans):
     assert counts["router_call"] == 3
 
 
+@pytest.mark.T11_trace_structure
+@pytest.mark.T11_sql_input
 def test_t11_trace_has_tool_hierarchy_and_clean_sql_input(traced_o1_spans):
     spans, trace_spans, provider = traced_o1_spans
     counts = Counter(spans["name"].astype(str))
@@ -805,6 +865,8 @@ def test_t11_trace_has_tool_hierarchy_and_clean_sql_input(traced_o1_spans):
     assert sql_span["attributes"]["input.value"] == provider.executed_sql
 
 
+@pytest.mark.T11_trace_structure
+@pytest.mark.T11_sql_input
 def test_t11_trace_contains_at_least_five_model_calls(traced_o1_spans):
     spans, _, _ = traced_o1_spans
     model_calls = spans.loc[spans["name"] == "model_call"]
@@ -854,6 +916,8 @@ def evaluated_v1_with_instrumented_judges(tmp_path_factory, isolated_phoenix):
         judge_tracer_provider.shutdown()
 
 
+@pytest.mark.T12_judge_exclusion
+@pytest.mark.T12_trace_isolation
 def test_t12_evaluation_judge_calls_are_not_exported_as_agent_spans(
     evaluated_v1_with_instrumented_judges,
 ):
@@ -861,6 +925,8 @@ def test_t12_evaluation_judge_calls_are_not_exported_as_agent_spans(
     assert evaluated["evaluation_instrumented_count"] == evaluated["baseline_instrumented_count"]
 
 
+@pytest.mark.T12_judge_exclusion
+@pytest.mark.T12_trace_isolation
 def test_t12_judge_prompts_are_absent_from_run_records(evaluated_v1_with_instrumented_judges):
     experiment = evaluated_v1_with_instrumented_judges["experiment"]
     records = [run["output"] for run in experiment["task_runs"]]
@@ -874,6 +940,8 @@ def test_t12_judge_prompts_are_absent_from_run_records(evaluated_v1_with_instrum
     )
 
 
+@pytest.mark.T12_judge_exclusion
+@pytest.mark.T12_trace_isolation
 def test_t12_evaluation_does_not_change_agent_path_length(evaluated_v1_with_instrumented_judges):
     records = [
         run["output"]
@@ -887,6 +955,8 @@ def test_t12_evaluation_does_not_change_agent_path_length(evaluated_v1_with_inst
     assert o1_record["path_length"] == 7
 
 
+@pytest.mark.T13_judge_labels
+@pytest.mark.T13_stored_data
 def test_t13_judge_prompt_requests_only_the_two_named_labels(evaluated_v1_with_instrumented_judges):
     prompts = evaluated_v1_with_instrumented_judges["judge_prompts"]
     assert prompts
@@ -903,6 +973,8 @@ def test_t13_judge_prompt_requests_only_the_two_named_labels(evaluated_v1_with_i
         assert not any(term in prompt.lower() for term in ("numeric rating", "scale of", "1 to 5"))
 
 
+@pytest.mark.T13_judge_labels
+@pytest.mark.T13_stored_data
 def test_t13_stored_judgments_keep_label_and_explanation(evaluated_v1_with_instrumented_judges):
     experiment = evaluated_v1_with_instrumented_judges["experiment"]
     task_run = next(
@@ -945,6 +1017,8 @@ def _evaluated_case_scores(evaluated_version):
     }
 
 
+@pytest.mark.T14_router_evaluation
+@pytest.mark.T14_scoring
 def test_t14_router_scores_each_planted_case(evaluated_v1_with_instrumented_judges):
     scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
     assert scores["Which product SKU sold the most units?"]["function_calling_eval"] == 1
@@ -959,11 +1033,15 @@ def test_t14_router_scores_each_planted_case(evaluated_v1_with_instrumented_judg
     assert hello["score"] == 0
 
 
+@pytest.mark.T14_router_evaluation
+@pytest.mark.T14_scoring
 def test_t14_router_mean_is_expected(evaluated_v1_with_instrumented_judges):
     mean = evaluated_v1_with_instrumented_judges["result"]["overall"]["means"]["function_calling_eval"]
     assert mean == pytest.approx(6.5 / 7)
 
 
+@pytest.mark.T15_sql_evaluator
+@pytest.mark.T15_evaluation
 def test_t15_sql_result_scores_each_planted_case(evaluated_v1_with_instrumented_judges):
     scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
     assert scores["Which product SKU sold the most units?"]["evaluate_sql_result"] == 1
@@ -972,6 +1050,8 @@ def test_t15_sql_result_scores_each_planted_case(evaluated_v1_with_instrumented_
     assert scores["Which store had the highest total sales value?"]["evaluate_sql_result"] == 0
 
 
+@pytest.mark.T15_sql_evaluator
+@pytest.mark.T15_evaluation
 def test_t15_missing_lookup_response_scores_one():
     assert evaluate_sql_result({"tool_responses": []}, "12") == 1
     assert evaluate_sql_result(
@@ -980,11 +1060,15 @@ def test_t15_missing_lookup_response_scores_one():
     ) == 1
 
 
+@pytest.mark.T15_sql_evaluator
+@pytest.mark.T15_evaluation
 def test_t15_sql_result_mean_is_expected(evaluated_v1_with_instrumented_judges):
     mean = evaluated_v1_with_instrumented_judges["result"]["overall"]["means"]["evaluate_sql_result"]
     assert mean == pytest.approx(6 / 7)
 
 
+@pytest.mark.T16_clarity_entity
+@pytest.mark.T16_evaluation
 def test_t16_clarity_scores_only_o7_zero(evaluated_v1_with_instrumented_judges):
     scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
     clarity = {question: item["evaluate_clarity"] for question, item in scores.items()}
@@ -997,6 +1081,8 @@ def test_t16_clarity_scores_only_o7_zero(evaluated_v1_with_instrumented_judges):
     assert sum(clarity.values()) / 7 == pytest.approx(6 / 7)
 
 
+@pytest.mark.T16_clarity_entity
+@pytest.mark.T16_evaluation
 def test_t16_entity_scores_only_o6_zero(evaluated_v1_with_instrumented_judges):
     scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
     entities = {question: item["evaluate_entity_correctness"] for question, item in scores.items()}
@@ -1009,6 +1095,8 @@ def test_t16_entity_scores_only_o6_zero(evaluated_v1_with_instrumented_judges):
     assert sum(entities.values()) / 7 == pytest.approx(6 / 7)
 
 
+@pytest.mark.T17_chart_evaluator
+@pytest.mark.T17_isolation
 def test_t17_chart_evaluator_scores_o4_o7_and_non_chart_case(evaluated_v1_with_instrumented_judges):
     scores = _evaluated_case_scores(evaluated_v1_with_instrumented_judges)
     assert scores["Make a bar chart of total sales value by store"]["code_is_runnable"] == 0
@@ -1016,10 +1104,14 @@ def test_t17_chart_evaluator_scores_o4_o7_and_non_chart_case(evaluated_v1_with_i
     assert scores["Which product SKU sold the most units?"]["code_is_runnable"] == 1
 
 
+@pytest.mark.T17_chart_evaluator
+@pytest.mark.T17_isolation
 def test_t17_missing_record_scores_zero():
     assert code_is_runnable(None) == 0
 
 
+@pytest.mark.T17_chart_evaluator
+@pytest.mark.T17_isolation
 def test_t17_chart_code_mean_is_expected(evaluated_v1_with_instrumented_judges):
     mean = evaluated_v1_with_instrumented_judges["result"]["overall"]["means"]["code_is_runnable"]
     assert mean == pytest.approx(6 / 7)
@@ -1068,12 +1160,16 @@ def evaluated_v1_v2(evaluated_v1_with_instrumented_judges, isolated_phoenix):
     }
 
 
+@pytest.mark.T19_convergence
+@pytest.mark.T19_evaluation
 def test_t19_path_lengths_match_k1_to_k6(evaluated_v1_v2):
     path_cases = evaluated_v1_v2["v1"]["path"]["cases"]
     assert [case["path_length"] for case in path_cases] == [5, 5, 5, 5, 7, None]
     assert [case["failed"] for case in path_cases] == [False, False, False, False, False, True]
 
 
+@pytest.mark.T19_convergence
+@pytest.mark.T19_evaluation
 def test_t19_failed_path_is_excluded_from_optimum_but_scores_zero(evaluated_v1_v2):
     path = evaluated_v1_v2["v1"]["path"]
     failed_case = path["cases"][-1]
@@ -1083,12 +1179,16 @@ def test_t19_failed_path_is_excluded_from_optimum_but_scores_zero(evaluated_v1_v
     assert failed_case["score"] == 0
 
 
+@pytest.mark.T19_convergence
+@pytest.mark.T19_evaluation
 def test_t19_each_convergence_score_and_mean_is_exact(evaluated_v1_v2):
     path = evaluated_v1_v2["v1"]["path"]
     assert [case["score"] for case in path["cases"]] == pytest.approx([1, 1, 1, 1, 5 / 7, 0])
     assert path["mean"] == pytest.approx((4 + 5 / 7) / 6)
 
 
+@pytest.mark.T20_version_comparison
+@pytest.mark.T20_evaluation
 def test_t20_both_versions_run_identical_cases_once(evaluated_v1_v2):
     v1 = evaluated_v1_v2["v1"]
     v2 = evaluated_v1_v2["v2"]
@@ -1109,6 +1209,8 @@ def test_t20_both_versions_run_identical_cases_once(evaluated_v1_v2):
             assert len({run["dataset_example_id"] for run in task_runs}) == expected_count
 
 
+@pytest.mark.T20_version_comparison
+@pytest.mark.T20_evaluation
 def test_t20_experiment_names_include_version(evaluated_v1_v2):
     experiments = evaluated_v1_v2["experiments"]
     assert experiments["v1_overall_metadata"]["name"] == "Overall Experiment v1"
@@ -1117,6 +1219,8 @@ def test_t20_experiment_names_include_version(evaluated_v1_v2):
     assert experiments["v2_path_metadata"]["name"] == "Convergence Eval v2"
 
 
+@pytest.mark.T20_version_comparison
+@pytest.mark.T20_evaluation
 def test_t20_v2_sql_prompt_contains_added_phrase(evaluated_v1_v2):
     v1_prompts = evaluated_v1_v2["v1_sql_prompts"]
     v2_prompts = evaluated_v1_v2["v2_sql_prompts"]
@@ -1125,6 +1229,8 @@ def test_t20_v2_sql_prompt_contains_added_phrase(evaluated_v1_v2):
     assert all("Think before you respond." in prompt for prompt in v2_prompts)
 
 
+@pytest.mark.T20_version_comparison
+@pytest.mark.T20_evaluation
 def test_t20_v2_sql_scores_show_both_regressions(evaluated_v1_v2):
     v2 = evaluated_v1_v2["v2"]
     scores = {
@@ -1155,6 +1261,8 @@ def _comparison_table(root, capsys):
     return [[cell.strip() for cell in line.split("|")] for line in lines]
 
 
+@pytest.mark.T21_comparison_output
+@pytest.mark.T21_formatting
 def test_t21_comparison_has_exact_columns_and_version_order(evaluated_v1_v2, capsys):
     table = _comparison_table(evaluated_v1_v2["root"], capsys)
     assert table[0] == [
@@ -1171,6 +1279,8 @@ def test_t21_comparison_has_exact_columns_and_version_order(evaluated_v1_v2, cap
     assert [row[0] for row in table[1:]] == ["v1", "v2"]
 
 
+@pytest.mark.T21_comparison_output
+@pytest.mark.T21_formatting
 def test_t21_comparison_values_match_case_results(evaluated_v1_v2, capsys):
     table = _comparison_table(evaluated_v1_v2["root"], capsys)
     assert table[1:] == [
@@ -1179,6 +1289,8 @@ def test_t21_comparison_values_match_case_results(evaluated_v1_v2, capsys):
     ]
 
 
+@pytest.mark.T21_comparison_output
+@pytest.mark.T21_formatting
 def test_t21_scores_use_two_decimal_places(evaluated_v1_v2, capsys):
     table = _comparison_table(evaluated_v1_v2["root"], capsys)
     for row in table[1:]:
@@ -1186,6 +1298,8 @@ def test_t21_scores_use_two_decimal_places(evaluated_v1_v2, capsys):
             assert re.fullmatch(r"\d+\.\d{2}", score)
 
 
+@pytest.mark.T2_upload
+@pytest.mark.T2_phoenix_integration
 def test_phoenix_rejects_tracing_destination_changes(isolated_phoenix):
     with pytest.raises(RuntimeError, match="different endpoint or project"):
         ensure_phoenix(
@@ -1200,6 +1314,8 @@ load_dotenv()
 
 @pytest.mark.live
 @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OPENAI_API_KEY is not configured")
+@pytest.mark.T3_tool_arguments
+@pytest.mark.T3_protocol
 def test_live_agent_can_answer_store_lookup():
     record = run_agent("Which store had the highest total sales value?")
     assert any(call["name"] == "lookup_sales_data" for call in record["tool_calls"])
@@ -1208,6 +1324,8 @@ def test_live_agent_can_answer_store_lookup():
 
 @pytest.mark.live
 @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OPENAI_API_KEY is not configured")
+@pytest.mark.T13_judge_labels
+@pytest.mark.T13_stored_data
 def test_live_judges_return_allowed_labels_and_explanations():
     provider = OpenAIProvider()
     record = run_agent("Which product SKU sold the most units?")

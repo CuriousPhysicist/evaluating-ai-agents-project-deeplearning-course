@@ -19,10 +19,68 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest"]
+test = ["pytest", "pytest-cov"]
+
+[project.entry-points."pytest11"]
+compliance = "agent_evals.pytest_plugin"
 
 [tool.setuptools.packages.find]
 include = ["agent_evals*"]
 
 [tool.pytest.ini_options]
-markers = ["live: requires OPENAI_API_KEY and network access"]
+markers = [
+    "live: requires OPENAI_API_KEY and network access",
+    "T1_setup: T1 - Core setup and configuration",
+    "T2_upload: T2 - Artifact upload and management",
+    "T2_phoenix_integration: T2 - Phoenix platform integration",
+    "T3_records: T3 - Tool call recording",
+    "T4_execution: T4 - Tool execution order",
+    "T5_replies: T5 - Tool reply handling",
+    "T6_sql_execution: T6 - SQL query execution",
+    "T7_error_handling: T7 - Error handling and recovery",
+    "T8_analysis: T8 - Analysis and responses",
+    "T9_chart: T9 - Chart code generation",
+    "T10_call_limit: T10 - Router call limits",
+    "T11_trace: T11 - Trace and execution paths",
+    "T12_evaluation: T12 - Evaluation and judge calls",
+    "T13_judge_labels: T13 - Judge label normalization",
+    "T14_router_scoring: T14 - Router performance scoring",
+    "T15_sql_scoring: T15 - SQL result scoring",
+    "T16_clarity: T16 - Clarity scoring",
+    "T17_entity: T17 - Entity recognition scoring",
+    "T18_chart_code: T18 - Chart code validation",
+    "T19_convergence: T19 - Convergence scoring",
+    "T20_ab_testing: T20 - A/B testing and comparison",
+    "T21_reporting: T21 - Final reporting and output",
+    "ASSURANCE_SNAPSHOT: Snapshot-based assurance testing",
+    "ASSURANCE_WEIGHT: Weight validation testing",
+    "ASSURANCE_EXPORT: Export and persistence testing",
+    "ASSURANCE_COMPARISON: Comparison testing",
+    "ASSURANCE_REAL_PHOENIX: Real Phoenix integration testing",
+]
+addopts = "--cov=agent_evals --cov-report=term-missing --cov-report=html"
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+precision = 2
+skip_covered = false
+fail_under = 80
+
+[tool.coverage.html]
+directory = "htmlcov"

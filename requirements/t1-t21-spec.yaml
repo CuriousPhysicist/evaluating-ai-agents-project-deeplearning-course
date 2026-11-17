@@ -1,0 +1,162 @@
+# T1-T21 Specification Requirements
+# Source: evaluating-ai-agents-spec-62ab422.md
+# Version: 1.0
+# Created: 2026-11-16
+# Description: T1 through T21 compliance requirements for the evaluating-ai-agents project
+
+metadata:
+  version: "1.0"
+  description: "T1-T21 requirements from evaluating-ai-agents specification"
+  created: "2026-11-16"
+  source: "evaluating-ai-agents-spec-62ab422.md"
+
+requirements:
+  - id: T1
+    description: "Setup creates specified project structure"
+    weight: 1.0
+    test_markers: [T1_setup, T1_project_structure]
+    evidence_sources: [test_outcome]
+    notes: "Related to setup initialization and project directory structure"
+
+  - id: T2
+    description: "Datasets are uploaded to Phoenix"
+    weight: 1.0
+    test_markers: [T2_upload, T2_phoenix_integration]
+    evidence_sources: [test_outcome]
+    notes: "Validates dataset upload and Phoenix project creation"
+
+  - id: T3
+    description: "Agent protocol: exact tool arguments"
+    weight: 1.0
+    test_markers: [T3_tool_arguments, T3_protocol]
+    evidence_sources: [test_outcome]
+    notes: "Verifies tool call argument exactness"
+
+  - id: T4
+    description: "Run records with multi-call ordering"
+    weight: 1.0
+    test_markers: [T4_run_records, T4_ordering]
+    evidence_sources: [test_outcome]
+    notes: "Validates run record structure and tool call ordering"
+
+  - id: T5
+    description: "Exactly one reply per tool-call ID"
+    weight: 1.0
+    test_markers: [T5_replies, T5_tool_call_pairing]
+    evidence_sources: [test_outcome]
+    notes: "Ensures one-to-one mapping between tool calls and replies"
+
+  - id: T6
+    description: "SQL fence removal in lookup behavior"
+    weight: 1.0
+    test_markers: [T6_sql_fence, T6_lookup]
+    evidence_sources: [test_outcome]
+    notes: "Validates SQL query fence markers are properly removed"
+
+  - id: T7
+    description: "Analysis fallback on lookup errors"
+    weight: 1.0
+    test_markers: [T7_analysis_fallback, T7_error_handling]
+    evidence_sources: [test_outcome]
+    notes: "Verifies fallback behavior when lookups fail"
+
+  - id: T8
+    description: "Chart configuration and execution"
+    weight: 1.0
+    test_markers: [T8_chart_config, T8_chart_execution]
+    evidence_sources: [test_outcome]
+    notes: "Validates chart generation and configuration"
+
+  - id: T9
+    description: "Returned code non-execution guarantee"
+    weight: 1.0
+    test_markers: [T9_code_return, T9_no_execution]
+    evidence_sources: [test_outcome]
+    notes: "Ensures generated code is returned but not executed"
+
+  - id: T10
+    description: "Router call limit enforced at 10 calls"
+    weight: 1.0
+    test_markers: [T10_call_limit, T10_experiment_failure]
+    evidence_sources: [test_outcome]
+    notes: "Covers both agent-level and experiment-level accounting"
+
+  - id: T11
+    description: "Trace structure and SQL input"
+    weight: 1.0
+    test_markers: [T11_trace_structure, T11_sql_input]
+    evidence_sources: [test_outcome]
+    notes: "Validates trace parent/child relationships and SQL annotations"
+
+  - id: T12
+    description: "Judge-trace exclusion"
+    weight: 1.0
+    test_markers: [T12_judge_exclusion, T12_trace_isolation]
+    evidence_sources: [test_outcome]
+    notes: "Ensures judge traces are excluded from normal tracing"
+
+  - id: T13
+    description: "Stored judge labels and explanations"
+    weight: 1.0
+    test_markers: [T13_judge_labels, T13_judge_explanations]
+    evidence_sources: [test_outcome]
+    notes: "Verifies judge decision storage and annotation"
+
+  - id: T14
+    description: "Evaluator scoring with planted cases"
+    weight: 1.0
+    test_markers: [T14_scorer, T14_planted_scores]
+    evidence_sources: [test_outcome]
+    notes: "Validates evaluator score calculation with known cases"
+
+  - id: T15
+    description: "Missing-tool semantics in scoring"
+    weight: 1.0
+    test_markers: [T15_missing_tool, T15_scoring_fallback]
+    evidence_sources: [test_outcome]
+    notes: "Tests scoring behavior when tools are not found"
+
+  - id: T16
+    description: "Aggregate means calculation"
+    weight: 1.0
+    test_markers: [T16_aggregate, T16_means]
+    evidence_sources: [test_outcome]
+    notes: "Verifies correct aggregation of evaluation scores"
+
+  - id: T17
+    description: "Evaluator result ordering"
+    weight: 1.0
+    test_markers: [T17_result_ordering]
+    evidence_sources: [test_outcome]
+    notes: "Validates consistent ordering of evaluation results"
+
+  - id: T18
+    description: "Generated-code isolation in subprocess"
+    weight: 1.0
+    test_markers: [T18_subprocess_timeout, T18_working_directory, T18_recovery]
+    evidence_sources: [test_outcome]
+    notes: "Covers timeout, containment, and post-timeout recovery"
+
+  - id: T19
+    description: "Experiment convergence"
+    weight: 1.0
+    test_markers: [T19_convergence, T19_scores]
+    evidence_sources: [test_outcome]
+    notes: "Verifies experiment convergence and score consistency"
+
+  - id: T20
+    description: "Versioned runs and result ordering"
+    weight: 1.0
+    test_markers: [T20_versioned_runs, T20_result_ordering]
+    evidence_sources: [test_outcome]
+    notes: "Validates version tracking and consistent ordering"
+
+  - id: T21
+    description: "Exact experiment comparison output"
+    weight: 1.0
+    test_markers: [T21_comparison_output, T21_formatting]
+    evidence_sources: [test_outcome]
+    notes: "Verifies comparison command output format and content"
+
+weight_constraints:
+  min_ratio: 0.5

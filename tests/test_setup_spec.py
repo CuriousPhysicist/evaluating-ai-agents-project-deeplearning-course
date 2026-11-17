@@ -30,6 +30,8 @@ def _read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+@pytest.mark.T1_setup
+@pytest.mark.T1_project_structure
 def test_t01_setup_from_empty_root_creates_sample_table(tmp_path):
     assert list(tmp_path.iterdir()) == []
 
@@ -52,6 +54,8 @@ def test_t01_setup_from_empty_root_creates_sample_table(tmp_path):
     assert set(sales["On_Promo"]) == {0, 1}
 
 
+@pytest.mark.T1_setup
+@pytest.mark.T1_project_structure
 def test_t01_setup_creates_both_fixed_question_sets(tmp_path):
     setup(root=tmp_path, client=SetupClient())
 
@@ -69,6 +73,8 @@ def test_t01_setup_creates_both_fixed_question_sets(tmp_path):
     assert all(isinstance(case["question"], str) and case["question"] for case in convergence)
 
 
+@pytest.mark.T1_setup
+@pytest.mark.T1_project_structure
 def test_t01_setup_creates_version_files_and_results_directory(tmp_path):
     setup(root=tmp_path, client=SetupClient())
 
@@ -77,6 +83,8 @@ def test_t01_setup_creates_version_files_and_results_directory(tmp_path):
     assert (tmp_path / "results").is_dir()
 
 
+@pytest.mark.T1_setup
+@pytest.mark.T1_project_structure
 def test_t01_setup_does_not_overwrite_question_sets(tmp_path):
     client = SetupClient()
     setup(root=tmp_path, client=client)
@@ -110,6 +118,8 @@ def _latest_dataset(client, prefix: str) -> dict:
     return max(matches, key=lambda dataset: str(dataset.get("created_at", "")))
 
 
+@pytest.mark.T2_upload
+@pytest.mark.T2_phoenix_integration
 def test_t02_setup_creates_named_project_and_two_datasets(uploaded_test_sets):
     client = uploaded_test_sets.client
 
@@ -119,6 +129,8 @@ def test_t02_setup_creates_named_project_and_two_datasets(uploaded_test_sets):
     assert _datasets_with_prefix(client, "convergence_questions-")
 
 
+@pytest.mark.T2_upload
+@pytest.mark.T2_phoenix_integration
 def test_t02_dataset_names_have_required_timestamp(uploaded_test_sets):
     client = uploaded_test_sets.client
     named_sets = (
@@ -136,6 +148,8 @@ def test_t02_dataset_names_have_required_timestamp(uploaded_test_sets):
             ) == timestamp
 
 
+@pytest.mark.T2_upload
+@pytest.mark.T2_phoenix_integration
 def test_t02_overall_dataset_has_exact_schema_and_ground_truth(uploaded_test_sets):
     client = uploaded_test_sets.client
     dataset_info = _latest_dataset(client, "overall_experiment_inputs-")
@@ -151,6 +165,8 @@ def test_t02_overall_dataset_has_exact_schema_and_ground_truth(uploaded_test_set
     assert "2970" in o3 and "64" in o3
 
 
+@pytest.mark.T2_upload
+@pytest.mark.T2_phoenix_integration
 def test_t02_convergence_dataset_contains_six_question_inputs(uploaded_test_sets):
     client = uploaded_test_sets.client
     dataset_info = _latest_dataset(client, "convergence_questions-")

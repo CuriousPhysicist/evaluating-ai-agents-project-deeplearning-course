@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Requirement Specification Schema",
+  "description": "Schema for defining compliance requirement specifications that can be scored against test results",
+  "type": "object",
+  "required": ["requirements"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata about the specification",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Version of this specification"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what these requirements cover"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when spec was created"
+        },
+        "author": {
+          "type": "string",
+          "description": "Author of the specification"
+        }
+      },
+      "additionalProperties": true
+    },
+    "requirements": {
+      "type": "array",
+      "description": "List of requirements to be scored",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "weight"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this requirement (e.g., 'T1', 'REQ_001')"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable description of the requirement"
+          },
+          "weight": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Relative weight/importance of this requirement in scoring"
+          },
+          "test_markers": {
+            "type": "array",
+            "description": "List of pytest markers associated with tests for this requirement",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence_sources": {
+            "type": "array",
+            "description": "Sources of evidence for this requirement",
+            "items": {
+              "type": "string",
+              "enum": ["test_outcome", "manual_review"]
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes about this requirement"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "weight_constraints": {
+      "type": "object",
+      "description": "Optional constraints on weight ratios",
+      "properties": {
+        "min_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Minimum ratio: min(weight) / max(weight) must exceed this value"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
