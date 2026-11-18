@@ -41,6 +41,23 @@ maths-page median exceeds twice the non-maths median plus one second.
 Different page content and network conditions also affect this comparison;
 it is not an isolated MathJax benchmark or a comparison with an earlier build.
 
+## Runtime inputs and migration
+
+Runtime inputs live under `inputs/`: sample sales data in `data/`, question
+sets in `datasets/`, and agent settings in `versions/`. Generated results
+remain in `results/`.
+
+When upgrading an existing workspace, manually reconcile any customised files
+from the old root-level `data/`, `datasets/`, and `versions/` directories with
+their matching locations under `inputs/`. Compare any existing destination
+before replacing it, and move old copies to a backup outside those old
+locations. No files are automatically copied, overwritten or deleted.
+
+Setup reports an error if any of the five old default input files remain,
+even when a new file already exists. Agent lookup, dataset upload and version
+loading likewise report an error if the corresponding old input is still
+present. Move or back it up after reconciling its contents before continuing.
+
 ## Install
 
 From PowerShell in this folder:

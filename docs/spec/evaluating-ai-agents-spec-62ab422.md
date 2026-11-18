@@ -16,6 +16,10 @@ This file is self-contained: everything the build needs is written here.
 
 *Provenance: course "Evaluating AI Agents" (DeepLearning.AI with Arize AI); materials used: transcripts of all 15 lessons, the five lab notebooks and helper module (as one rendered context file), descriptions of all 116 slides, and the owner-confirmed pattern card (2026-11-01); generated 2026-11-01 with guide v2.9 (2026-10-31).*
 
+**Repository layout revision (18 November 2026):** Runtime input paths were
+updated to the `inputs/` layout, and T1's idempotence check now covers all five
+input files. Git history retains the original wording.
+
 ---
 
 ## 0. Before you build — REQUIRED (do this first)
@@ -133,9 +137,9 @@ Given an agent and two fixed test sets, run every test case through a named vers
 - `python -m agent_evals evaluate --version <name>` — runs the overall experiment and the path experiment for that version, writes `results/<name>.json`.
 - `python -m agent_evals compare` — prints the comparison table for every version in `results/`, in the order they were evaluated.
 
-**Sample table** `data/sample_sales.parquet`, loaded as SQL table `sales`. Columns and types: `Store_Number` integer, `SKU_Coded` integer, `Sold_Date` date, `Qty_Sold` integer, `Total_Sale_Value` double, `On_Promo` integer 0 or 1.
+**Sample table** `inputs/data/sample_sales.parquet`, loaded as SQL table `sales`. Columns and types: `Store_Number` integer, `SKU_Coded` integer, `Sold_Date` date, `Qty_Sold` integer, `Total_Sale_Value` double, `On_Promo` integer 0 or 1.
 
-**Test case** (`datasets/overall_questions.json`, a list):
+**Test case** (`inputs/datasets/overall_questions.json`, a list):
 ```json
 {"type":"object","required":["question","sql_generated","sql_result"],"additionalProperties":false,
  "properties":{"question":{"type":"string","minLength":1},
@@ -144,9 +148,9 @@ Given an agent and two fixed test sets, run every test case through a named vers
 ```
 Only `question` is an input; `sql_generated` and `sql_result` are expected outputs.
 
-**Similar-question case** (`datasets/convergence_questions.json`, a list): `{"question": string}`, input only.
+**Similar-question case** (`inputs/datasets/convergence_questions.json`, a list): `{"question": string}`, input only.
 
-**Version** (`versions/<name>.json`):
+**Version** (`inputs/versions/<name>.json`):
 ```json
 {"type":"object","required":["name"],"additionalProperties":false,
  "properties":{"name":{"type":"string","pattern":"^[A-Za-z0-9_-]+$"},
@@ -222,10 +226,10 @@ Anything not overridden takes the setting in the settings table. The version-nam
 - **R15. Chart-code evaluator (`code_is_runnable`).** Takes the first `generate_visualization` tool response, removes fences, and runs it in a separate process, in a temporary working directory, with `code_run_timeout_seconds`; scores 1 when it exits without error, 0 on error or timeout. A record with no visualization response scores 1 (the course's code does this; see N3). The evaluator's own process is never affected by the code. → T17, T18
 - **R16. Path evaluator (`Convergence Eval`).** Over one version's runs of the similar-question set: the optimal path length is the smallest `path_length` among completed runs; each completed run scores optimal ÷ its `path_length`; the version's path score is the mean over all runs. → T19
 - **R17. Fixed test sets.** `setup` writes the two test sets once (section 7.1) and uploads them; every version is evaluated on exactly these cases; `setup` never overwrites existing test-set files. → T1, T2, T20
-- **R18. Versions.** `evaluate --version <name>` builds the agent from `versions/<name>.json` and runs the overall set with the five evaluators of R11–R15 and the similar-question set with R16, `repetitions per version` times, under the experiment names in the settings table. → T20
+- **R18. Versions.** `evaluate --version <name>` builds the agent from `inputs/versions/<name>.json` and runs the overall set with the five evaluators of R11–R15 and the similar-question set with R16, `repetitions per version` times, under the experiment names in the settings table. → T20
 - **R19. Comparison.** `compare` prints one row per evaluated version, in evaluation order, with columns: version, `function_calling_eval`, `evaluate_sql_result`, `evaluate_clarity`, `evaluate_entity_correctness`, `code_is_runnable`, `convergence`, optimal path length, failed runs; scores to 2 decimals. → T21
 - **R20. Failed runs.** A failed run (an error, or R7) has no record; every overall evaluator scores it 0, the path evaluator scores it 0 and leaves it out of the optimal path length, and the comparison counts it under failed runs. → T10, T17, T19, T21
-- **R21. Fresh start.** On an empty folder, `setup` creates the sample table file, the two test-set files, `versions/v1.json` and `versions/v2.json`, and `results/`, and the recording backend has project `evaluating-agent` and both test sets. → T1, T2
+- **R21. Fresh start.** On an empty folder, `setup` creates the sample table file, the two test-set files, `inputs/versions/v1.json` and `inputs/versions/v2.json`, and `results/`, and the recording backend has project `evaluating-agent` and both test sets. → T1, T2
 
 ### What must stay true (the course's pattern card)
 Every option of every question keeps all four.
@@ -238,7 +242,7 @@ Every option of every question keeps all four.
 
 ### 7.1 Sample data
 
-**Sample table** (`data/sample_sales.parquet`, written by `setup`; facts written for this spec):
+**Sample table** (`inputs/data/sample_sales.parquet`, written by `setup`; facts written for this spec):
 
 | # | Sold_Date | Store_Number | SKU_Coded | Qty_Sold | Total_Sale_Value | On_Promo |
 |---|---|---|---|---|---|---|
@@ -255,7 +259,7 @@ Every option of every question keeps all four.
 
 Derived facts: units per SKU 6200700 = 12, 6200800 = 5, 6201000 = 2; total sales value 122.50; value per store 1320 = 44.50, 2970 = 64.00, 880 = 14.00; units per store 1320 = 6, 2970 = 10, 880 = 3; 3 of 10 transactions on promotion (30.0%); average transaction value 12.25; average units per transaction 1.9; 2021 value by month: November 78.50, December 44.00.
 
-**Overall test set** (`datasets/overall_questions.json`; `sql_result` is produced by `setup` from the reference SQL, D3):
+**Overall test set** (`inputs/datasets/overall_questions.json`; `sql_result` is produced by `setup` from the reference SQL, D3):
 
 | id | question | reference SQL (behaviour) | result holds |
 |---|---|---|---|
@@ -267,7 +271,7 @@ Derived facts: units per SKU 6200700 = 12, 6200800 = 5, 6201000 = 2; total sales
 | O6 | What was the average value of a transaction? | mean of `Total_Sale_Value` | 12.25 |
 | O7 | Draw a line chart of monthly sales value in 2021 | summed `Total_Sale_Value` per month of 2021, ordered by month | 11 78.5, 12 44 |
 
-**Similar-question set** (`datasets/convergence_questions.json`): K1 "What was the mean number of units per transaction?" · K2 "On average, how many units are in one transaction?" · K3 "How many items does one sale contain on average?" · K4 "Work out the usual quantity in a transaction" · K5 "How many units does a customer buy per transaction on average?" · K6 "What's the average basket size in units?"
+**Similar-question set** (`inputs/datasets/convergence_questions.json`): K1 "What was the mean number of units per transaction?" · K2 "On average, how many units are in one transaction?" · K3 "How many items does one sale contain on average?" · K4 "Work out the usual quantity in a transaction" · K5 "How many units does a customer buy per transaction on average?" · K6 "What's the average basket size in units?"
 
 **Versions:** `v1` has no overrides. `v2` overrides `sql_generation_prompt` with the default prompt plus a final line "Think before you respond." (the course's own change in Lesson 12).
 
@@ -309,7 +313,7 @@ Every test runs offline against the stand-in and a local Phoenix started by the 
 
 | Test | Rules | Given | When | Then |
 |---|---|---|---|---|
-| T1 | R17, R21 | an empty folder | `setup` | `data/sample_sales.parquet` has 10 rows and exactly the six columns of section 5; `datasets/overall_questions.json` has 7 cases, `datasets/convergence_questions.json` has 6; `versions/v1.json` and `versions/v2.json` exist; `results/` exists; running `setup` again leaves both test-set files byte-identical |
+| T1 | R17, R21 | an empty folder | `setup` | `inputs/data/sample_sales.parquet` has 10 rows and exactly the six columns of section 5; `inputs/datasets/overall_questions.json` has 7 cases, `inputs/datasets/convergence_questions.json` has 6; `inputs/versions/v1.json` and `inputs/versions/v2.json` exist; `results/` exists; running `setup` again leaves all five runtime input files byte-identical |
 | T2 | R17, R21 | after T1 | read the backend | project `evaluating-agent` exists; two test sets whose names match `overall_experiment_inputs-` / `convergence_questions-` + `YYYY-MM-DD HH:MM:SS`; the overall set has input key `question` and output keys `sql_result`, `sql_generated`; O1's `sql_result` contains `6200700` and `12`; O3's contains `2970` and `64` |
 | T3 | R1, R2, R8, MST2 | v1 | run O1 | record: `tool_calls` = [`lookup_sales_data` {prompt: O1}, `analyze_sales_data` {prompt: O1, data: the lookup result text}]; first `tool_responses` entry has `tool_name` `lookup_sales_data` and contains `6200700`; `final_output` = O1's final answer; message roles = user, system, assistant, tool, assistant, tool, assistant; `path_length` = 7 |
 | T4 | R1 | v1 | run P | both calls of the single reply run in order; two tool messages follow that reply; `final_output` "Done."; `path_length` = 6 |

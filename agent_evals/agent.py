@@ -17,7 +17,7 @@ from openinference.semconv.trace import SpanAttributes
 from pydantic import BaseModel, ValidationError
 from opentelemetry import trace
 
-from .paths import DEFAULT_ROOT, resolve_root
+from .paths import DEFAULT_ROOT, resolve_root, runtime_input_path
 
 ROOT = DEFAULT_ROOT
 TOOL_DEFINITIONS = [
@@ -118,7 +118,7 @@ class AgentSettings:
 
     @classmethod
     def load(cls, name: str, root: Path | None = None) -> AgentSettings:
-        path = resolve_root(root) / "versions" / f"{name}.json"
+        path = runtime_input_path(resolve_root(root), "versions", f"{name}.json")
         raw = json.loads(path.read_text(encoding="utf-8"))
         if raw.get("name") != name or not re.fullmatch(r"[A-Za-z0-9_-]+", name):
             raise ValueError(f"Invalid version file: {path}")
@@ -162,7 +162,7 @@ def lookup_sales_data(
     *,
     root: Path | None = None,
 ) -> str:
-    sample_path = resolve_root(root) / "data" / "sample_sales.parquet"
+    sample_path = runtime_input_path(resolve_root(root), "data", "sample_sales.parquet")
     tracer = trace.get_tracer("agent_evals")
     try:
         columns = ", ".join(pd.read_parquet(sample_path).columns)

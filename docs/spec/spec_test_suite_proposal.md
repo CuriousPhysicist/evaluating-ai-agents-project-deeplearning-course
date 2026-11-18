@@ -70,7 +70,7 @@ an aggregate-only check.
   convergence JSON files contain seven and six cases respectively, and each
   case has the specified input/output keys.
 - `test_t01_setup_creates_versions_and_results_directory`: assert
-  `versions/v1.json`, `versions/v2.json`, and `results/` exist.
+  `inputs/versions/v1.json`, `inputs/versions/v2.json`, and `results/` exist.
 - `test_t01_setup_does_not_overwrite_question_sets`: save both dataset files
   as bytes, run setup again, and assert byte-for-byte equality.
 

@@ -9,7 +9,7 @@ from typing import Any
 import duckdb
 import pandas as pd
 
-from .paths import DEFAULT_ROOT, resolve_root
+from .paths import DEFAULT_ROOT, resolve_root, runtime_input_path
 
 # Definition of constants and global variables:
 ROOT = DEFAULT_ROOT
@@ -55,7 +55,11 @@ def _write_json_if_missing(path: Path, value: object) -> None:
 def setup(root: Path | None = None, *, client: Any | None = None) -> None:
     """Create project files and upload test sets using the supplied or local recording client."""
     root = resolve_root(root)
-    data_path = root / "data" / "sample_sales.parquet"
+    data_path = runtime_input_path(root, "data", "sample_sales.parquet")
+    overall_path = runtime_input_path(root, "datasets", "overall_questions.json")
+    convergence_path = runtime_input_path(root, "datasets", "convergence_questions.json")
+    v1_path = runtime_input_path(root, "versions", "v1.json")
+    v2_path = runtime_input_path(root, "versions", "v2.json")
     if not data_path.exists():
         data_path.parent.mkdir(parents=True, exist_ok=True)
         frame = pd.DataFrame(
@@ -65,7 +69,6 @@ def setup(root: Path | None = None, *, client: Any | None = None) -> None:
         frame["Sold_Date"] = pd.to_datetime(frame["Sold_Date"]).dt.date
         frame.to_parquet(data_path, index=False)
 
-    overall_path = root / "datasets" / "overall_questions.json"
     if not overall_path.exists():
         frame = pd.read_parquet(data_path)
         with duckdb.connect() as connection:
@@ -82,12 +85,12 @@ def setup(root: Path | None = None, *, client: Any | None = None) -> None:
         _write_json_if_missing(overall_path, cases)
 
     _write_json_if_missing(
-        root / "datasets" / "convergence_questions.json",
+        convergence_path,
         [{"question": question} for question in SIMILAR_QUESTIONS],
     )
-    _write_json_if_missing(root / "versions" / "v1.json", {"name": "v1"})
+    _write_json_if_missing(v1_path, {"name": "v1"})
     _write_json_if_missing(
-        root / "versions" / "v2.json",
+        v2_path,
         {"name": "v2", "overrides": {"sql_generation_prompt": SQL_PROMPT + "\nThink before you respond."}},
     )
     (root / "results").mkdir(exist_ok=True)

@@ -756,11 +756,11 @@ def test_setup_and_agent_use_injected_temporary_root(tmp_path):
     client = SetupClient()
     setup(root=tmp_path, client=client)
 
-    assert (tmp_path / "data" / "sample_sales.parquet").exists()
-    assert (tmp_path / "datasets" / "overall_questions.json").exists()
-    assert (tmp_path / "datasets" / "convergence_questions.json").exists()
-    assert (tmp_path / "versions" / "v1.json").exists()
-    assert (tmp_path / "versions" / "v2.json").exists()
+    assert (tmp_path / "inputs" / "data" / "sample_sales.parquet").exists()
+    assert (tmp_path / "inputs" / "datasets" / "overall_questions.json").exists()
+    assert (tmp_path / "inputs" / "datasets" / "convergence_questions.json").exists()
+    assert (tmp_path / "inputs" / "versions" / "v1.json").exists()
+    assert (tmp_path / "inputs" / "versions" / "v2.json").exists()
     assert (tmp_path / "results").is_dir()
     assert len(client.datasets.created) == 2
 
@@ -772,6 +772,18 @@ def test_setup_and_agent_use_injected_temporary_root(tmp_path):
     )
     assert record["tool_responses"][0]["tool_name"] == "lookup_sales_data"
     assert "6200700" in record["tool_responses"][0]["tool_response"]
+
+
+def test_lookup_rejects_legacy_sales_data_even_if_new_input_exists(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    legacy = tmp_path / "data" / "sample_sales.parquet"
+    legacy.parent.mkdir()
+    legacy.write_bytes(b"custom data")
+
+    with pytest.raises(RuntimeError, match="Legacy runtime input"):
+        lookup_sales_data("Look up sales", AgentSettings(name="v1"), ScriptedProvider(), root=tmp_path)
+
+    assert legacy.read_bytes() == b"custom data"
 
 
 def _span_ids(spans):

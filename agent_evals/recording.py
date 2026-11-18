@@ -12,6 +12,8 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 from phoenix.client import Client
 
+from .paths import runtime_input_path
+
 PROJECT_NAME = "evaluating-agent"
 DEFAULT_BASE_URL = "http://127.0.0.1:6006"
 _TRACING_REGISTERED: tuple[str, str] | None = None
@@ -120,14 +122,16 @@ def ensure_phoenix(
 def upload_testsets(client: Client, root) -> tuple[str, str]:
     """Upload the benchmark datasets to Phoenix and return their created names.
 
-    The overall and convergence question sets are loaded from the repository's
-    datasets directory and created in Phoenix only if they do not already exist.
+    The overall and convergence question sets are loaded from the runtime
+    inputs and created in Phoenix only if they do not already exist.
     """
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     overall_name = f"overall_experiment_inputs-{timestamp}"
     convergence_name = f"convergence_questions-{timestamp}"
-    overall = json.loads((root / "datasets" / "overall_questions.json").read_text(encoding="utf-8"))
-    convergence = json.loads((root / "datasets" / "convergence_questions.json").read_text(encoding="utf-8"))
+    overall_path = runtime_input_path(root, "datasets", "overall_questions.json")
+    convergence_path = runtime_input_path(root, "datasets", "convergence_questions.json")
+    overall = json.loads(overall_path.read_text(encoding="utf-8"))
+    convergence = json.loads(convergence_path.read_text(encoding="utf-8"))
     existing_names = {dataset["name"] for dataset in client.datasets.list()}
     if overall_name not in existing_names:
         client.datasets.create_dataset(

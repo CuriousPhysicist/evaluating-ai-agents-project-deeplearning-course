@@ -8,6 +8,8 @@ import pandas as pd
 import pytest
 
 from agent_evals.__main__ import setup
+from agent_evals.agent import AgentSettings
+from agent_evals.recording import upload_testsets
 
 
 class SetupDatasets:
@@ -37,7 +39,7 @@ def test_t01_setup_from_empty_root_creates_sample_table(tmp_path):
 
     setup(root=tmp_path, client=SetupClient())
 
-    sales = pd.read_parquet(tmp_path / "data" / "sample_sales.parquet")
+    sales = pd.read_parquet(tmp_path / "inputs" / "data" / "sample_sales.parquet")
     assert len(sales) == 10
     assert list(sales.columns) == [
         "Store_Number",
@@ -59,8 +61,8 @@ def test_t01_setup_from_empty_root_creates_sample_table(tmp_path):
 def test_t01_setup_creates_both_fixed_question_sets(tmp_path):
     setup(root=tmp_path, client=SetupClient())
 
-    overall = _read_json(tmp_path / "datasets" / "overall_questions.json")
-    convergence = _read_json(tmp_path / "datasets" / "convergence_questions.json")
+    overall = _read_json(tmp_path / "inputs" / "datasets" / "overall_questions.json")
+    convergence = _read_json(tmp_path / "inputs" / "datasets" / "convergence_questions.json")
 
     assert len(overall) == 7
     assert all(set(case) == {"question", "sql_generated", "sql_result"} for case in overall)
@@ -78,25 +80,78 @@ def test_t01_setup_creates_both_fixed_question_sets(tmp_path):
 def test_t01_setup_creates_version_files_and_results_directory(tmp_path):
     setup(root=tmp_path, client=SetupClient())
 
-    assert (tmp_path / "versions" / "v1.json").is_file()
-    assert (tmp_path / "versions" / "v2.json").is_file()
+    assert (tmp_path / "inputs" / "versions" / "v1.json").is_file()
+    assert (tmp_path / "inputs" / "versions" / "v2.json").is_file()
     assert (tmp_path / "results").is_dir()
 
 
 @pytest.mark.T1_setup
 @pytest.mark.T1_project_structure
-def test_t01_setup_does_not_overwrite_question_sets(tmp_path):
+def test_t01_setup_does_not_overwrite_runtime_inputs(tmp_path):
     client = SetupClient()
     setup(root=tmp_path, client=client)
-    overall_path = tmp_path / "datasets" / "overall_questions.json"
-    convergence_path = tmp_path / "datasets" / "convergence_questions.json"
-    original_overall = overall_path.read_bytes()
-    original_convergence = convergence_path.read_bytes()
+    inputs = tmp_path / "inputs"
+    paths = [
+        inputs / "data" / "sample_sales.parquet",
+        inputs / "datasets" / "overall_questions.json",
+        inputs / "datasets" / "convergence_questions.json",
+        inputs / "versions" / "v1.json",
+        inputs / "versions" / "v2.json",
+    ]
+    paths[3].write_text('{"name": "v1", "overrides": {"agent_model": "custom"}}\n', encoding="utf-8")
+    original = {path: path.read_bytes() for path in paths}
 
     setup(root=tmp_path, client=client)
 
-    assert overall_path.read_bytes() == original_overall
-    assert convergence_path.read_bytes() == original_convergence
+    assert {path: path.read_bytes() for path in paths} == original
+    assert AgentSettings.load("v1", root=tmp_path).agent_model == "custom"
+
+
+@pytest.mark.parametrize(
+    "legacy_parts",
+    [
+        ("data", "sample_sales.parquet"),
+        ("datasets", "overall_questions.json"),
+        ("datasets", "convergence_questions.json"),
+        ("versions", "v1.json"),
+        ("versions", "v2.json"),
+    ],
+)
+def test_setup_reports_legacy_inputs_before_writing_defaults(tmp_path, legacy_parts):
+    legacy = tmp_path.joinpath(*legacy_parts)
+    legacy.parent.mkdir(parents=True)
+    legacy.write_bytes(b"custom input")
+
+    with pytest.raises(RuntimeError, match="Legacy runtime input"):
+        setup(root=tmp_path, client=SetupClient())
+
+    assert legacy.read_bytes() == b"custom input"
+    assert not (tmp_path / "inputs").exists()
+
+
+def test_version_load_rejects_legacy_file_even_if_new_default_exists(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    legacy = tmp_path / "versions" / "v1.json"
+    legacy.parent.mkdir()
+    legacy.write_text('{"name": "v1", "overrides": {"agent_model": "custom"}}', encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="Legacy runtime input"):
+        AgentSettings.load("v1", root=tmp_path)
+
+    assert json.loads(legacy.read_text(encoding="utf-8"))["overrides"]["agent_model"] == "custom"
+
+
+def test_upload_requires_manual_migration_of_legacy_dataset(tmp_path):
+    setup(root=tmp_path, client=SetupClient())
+    legacy = tmp_path / "datasets" / "overall_questions.json"
+    legacy.parent.mkdir()
+    legacy.write_text("[]", encoding="utf-8")
+    client = SetupClient()
+
+    with pytest.raises(RuntimeError, match="Legacy runtime input"):
+        upload_testsets(client, tmp_path)
+
+    assert client.datasets.created == []
 
 
 @pytest.fixture(scope="module")

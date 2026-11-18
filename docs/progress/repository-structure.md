@@ -7,7 +7,8 @@ nav_order: 3
 # Repository structure: work in progress
 
 **Last updated:** 18 November 2026<br>
-**Status:** Further restructuring is proposed, not yet agreed.
+**Status:** Runtime inputs have been grouped; existing workspaces require
+manual migration. Moving compliance specifications remains proposed.
 
 ## Completed
 
@@ -17,14 +18,16 @@ nav_order: 3
   [pre-refactor archive](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/tree/main/archive/pre-refactor-test-harness)
   and updated its QA references (commit `2e31cae`). Its README records the
   source commit and explains that the snapshot is historical evidence.
+- Grouped runtime inputs under `inputs/`. Updated dependent code, tests,
+  documentation and the source specification's path wording.
 
 ## Current categories
 
 | Location | Role |
 | --- | --- |
-| `data/` | Sample sales data used by the running agent. |
-| `datasets/` | Question sets used for evaluation and Phoenix uploads. |
-| `versions/` | Agent version settings. |
+| `inputs/data/` | Sample sales data used by the running agent. |
+| `inputs/datasets/` | Question sets used for evaluation and Phoenix uploads. |
+| `inputs/versions/` | Agent version settings. |
 | `requirements/` | Compliance specification and schema, not Python dependencies. |
 | `results/` | Generated local results and logs, separate from tracked inputs. |
 | `archive/pre-refactor-test-harness/` | Historical QA evidence, not the current tests. |
@@ -36,26 +39,13 @@ existing ones.
 
 ## Proposed follow-up
 
-- Consider grouping `data/`, `datasets/` and `versions/` under one clearly
-  named runtime-input location. No destination has been selected and no runtime
-  files have been moved.
-- Consider a clearer name or location for `requirements/` to distinguish the
-  compliance specification from Python dependency requirements.
-- Keep generated `results/` separate from tracked inputs, and keep
-  `pyproject.toml` at the repository root.
+- Move the compliance specification and schema to a clearer location.
 
-## Decisions and checks before moving runtime inputs
+## Migration decision
 
-The existing paths are used by setup, agent execution, dataset uploads and
-tests. Existing workspaces can also contain user-edited inputs. Decide how to
-handle those files before changing the layout:
-
-1. Copy existing inputs to the new layout during setup without overwriting
-   files; decide how to report conflicts when both locations contain data.
-2. Require and document manual migration.
-3. Keep reading the existing paths for compatibility while using the new
-   layout for new workspaces.
-
-No option has been chosen. Once agreed, update dependent code, tests and
-documentation, and verify fresh setup, existing inputs, agent lookup, version
-loading and dataset uploads. Preserve generated results and user data.
+Manual migration was chosen to preserve user-edited inputs. The tool does not
+copy or delete existing inputs, and it reports legacy files rather than
+silently selecting new defaults. See the
+repository [migration instructions](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course#runtime-inputs-and-migration)
+before using an existing workspace. Generated results remain separate and
+`pyproject.toml` stays at the repository root.
