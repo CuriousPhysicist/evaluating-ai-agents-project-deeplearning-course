@@ -30,10 +30,10 @@ separate, ongoing repository reorganization.
 **Time:** 20-30 minutes
 
 ### For Phase 1c Planners
-**Start here:** [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) - Remaining Work<br>
-**Then read:** Recommendations section  
-**Reference:** Previous assessments for context  
-**Time:** 15-20 minutes
+**Start here:** [PHASE_1c_QUICK_REFERENCE.md](PHASE_1c_QUICK_REFERENCE.md) - One-page summary<br>
+**Then read:** [OUTSTANDING_TASKS_AND_GAPS.md](OUTSTANDING_TASKS_AND_GAPS.md) - Detailed breakdown  
+**Reference:** [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) for Phase 1 context  
+**Time:** 20-30 minutes
 
 ### For Stakeholder Updates
 **Use:** [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) - Executive Summary + Key Achievements<br>
@@ -44,7 +44,7 @@ separate, ongoing repository reorganization.
 
 ## 📚 Documentation Map
 
-### Primary Records (This Update)
+### Primary Records (This Update + Phase 1c Planning)
 
 #### 1. **qa_refactor_plan.md** (21 KB, 346 lines)
 **Type:** Original plan + assessments  
@@ -53,46 +53,68 @@ separate, ongoing repository reorganization.
 - Progress summary — 15 November 2026 (original assessment)
 - **NEW:** Progress assessment — 17 November 2026 (this update)
 
-**What's New (17 Nov Section):**
-- Summary of progress on all three desired outcomes
-- Before/after comparison for each outcome
-- Key achievements and deliverables
-- Gap closure quantified (e.g., 30-40% → 100%)
-- Remaining work for Phase 1c
-- Conclusion on all outcomes achieved
-
 **When to Reference:**
 - Need historical progression context
 - Want to see before/after analysis
 - Planning Phase 1c next steps
-- Reviewing metric development rationale
 
-**Link:** [Read qa_refactor_plan.md](../qa/qa_refactor_plan.md#qa-progress-2026-11-17)
+**Link:** [Read qa_refactor_plan.md](../qa/qa_refactor_plan.md)
 
 ---
 
 #### 2. **PHASE_1_COMPLETION_RECORD.md** (16.5 KB, 395 lines)
 **Type:** Formal completion record  
-**Key Sections:**
-1. Executive Summary
-2. Desired Outcomes (charter statements)
-3. Phase 1a Deliverables (detailed)
-4. Phase 1b Deliverables (detailed)
-5. Combined Phase 1a & 1b Results
-6. Capability Gains Summary (6 major improvements)
-7. Verification & Sign-Off (comprehensive checklists)
-8. Desired Outcomes: Final Status (evidence-based assessment)
-9. Remaining Work (Phase 1c & beyond)
-10. Recommendations (action items by timeframe)
+**Purpose:** Executive summary, verification, sign-off
 
 **When to Use:**
-- Stakeholder communications (executive summary)
+- Stakeholder communications
 - Code review (verification checklists)
-- Phase 1c planning (remaining work + recommendations)
-- Formal record keeping
-- Quality baseline establishment
+- Phase 1 baseline establishment
 
 **Link:** [Read PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md)
+
+---
+
+#### 3. **OUTSTANDING_TASKS_AND_GAPS.md** (21.6 KB, 576 lines) ⭐ **NEW**
+**Type:** Comprehensive task breakdown for Phase 1c & beyond
+**Key Sections:**
+1. Executive Summary
+2. Status at a glance
+3. 🎯 Critical: Merge to main (ready now)
+4. 🔴 High priority (Phase 1c): CI/CD gating, historical tracking, QA gaps
+5. 🟡 Medium priority: Dashboard, regression alerts, repository migration
+6. 🟢 Low priority: CLI separation, extraction, enhancements
+7. Recommended sequencing & dependencies
+8. Dependency graph
+9. Key decisions
+10. Success criteria
+
+**When to Use:**
+- **Phase 1c Planning:** Detailed task breakdown
+- **Developer Assignment:** Reference for effort estimation
+- **Dependency Planning:** See what blocks what
+- **Team Communication:** Shared understanding of scope
+
+**Link:** [Read OUTSTANDING_TASKS_AND_GAPS.md](OUTSTANDING_TASKS_AND_GAPS.md)
+
+---
+
+#### 4. **PHASE_1c_QUICK_REFERENCE.md** (4.5 KB, 180 lines) ⭐ **NEW**
+**Type:** One-page quick lookup
+**Key Sections:**
+- Immediate actions (this week)
+- Phase 1c core items (weeks 2-6)
+- Verification checklist
+- Success criteria
+- Key references
+
+**When to Use:**
+- **Quick Lookup:** Fast reference for tasks and timeline
+- **Kick-off Meeting:** Printed handout for discussion
+- **Status Updates:** Share with stakeholders
+- **Team Onboarding:** New team members overview
+
+**Link:** [Read PHASE_1c_QUICK_REFERENCE.md](PHASE_1c_QUICK_REFERENCE.md)
 
 ---
 
