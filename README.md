@@ -16,6 +16,8 @@ bundle exec jekyll serve
 ```
 
 Open `http://127.0.0.1:4000`. The remote theme requires internet access when building.
+Pages load MathJax 3 from jsDelivr to render formulas; without CDN access,
+the formulas remain as text.
 
 ## Install
 

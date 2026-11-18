@@ -118,6 +118,7 @@ coverage evidence:
 $$
 SpecAssurance (\%) =100\times\frac{\Sigma(Weight_i\times EvidenceScore_i)}{\Sigma Weight_i}
 $$
+
 Keep coverage separate from test outcomes. Report passes, failures, and skips
 separately, including skipped live tests: the existence of a test does not
 establish that the behavior passed. When comparing QA_CHECK_1 and QA_CHECK_2,
