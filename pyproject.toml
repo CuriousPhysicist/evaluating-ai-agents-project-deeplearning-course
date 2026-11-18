@@ -20,6 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
+docs-test = ["playwright>=1.49,<2"]
 
 [project.entry-points."pytest11"]
 compliance = "agent_evals.pytest_plugin"
@@ -30,6 +31,7 @@ include = ["agent_evals*"]
 [tool.pytest.ini_options]
 markers = [
     "live: requires OPENAI_API_KEY and network access",
+    "docs_live: requires a Jekyll build, browser, and CDN access",
     "T1_setup: T1 - Core setup and configuration",
     "T2_upload: T2 - Artifact upload and management",
     "T2_phoenix_integration: T2 - Phoenix platform integration",

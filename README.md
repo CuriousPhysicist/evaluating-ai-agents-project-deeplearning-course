@@ -19,6 +19,28 @@ Open `http://127.0.0.1:4000`. The remote theme requires internet access when bui
 Pages load MathJax 3 from jsDelivr to render formulas; without CDN access,
 the formulas remain as text.
 
+### Documentation checks
+
+The offline checks run with the normal pytest suite. To additionally check the
+live CDN, rendered equations and page timings, install the documentation test
+dependencies and a Playwright Chromium browser, then opt in:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[test,docs-test]"
+.\.venv\Scripts\python.exe -m playwright install chromium
+$env:DOCS_LIVE_TESTS = "1"
+.\.venv\Scripts\python.exe -m pytest -o addopts="" -m docs_live tests\test_docs_math.py -s
+Remove-Item Env:\DOCS_LIVE_TESTS
+```
+
+Run these commands from the repository root with Ruby and Bundler on `PATH`.
+The live checks build the site and need access to GitHub and jsDelivr. The
+timing check compares five cold browser loads of a maths page and a non-maths
+page, through the browser load event and MathJax startup. It fails if the
+maths-page median exceeds twice the non-maths median plus one second.
+Different page content and network conditions also affect this comparison;
+it is not an isolated MathJax benchmark or a comparison with an earlier build.
+
 ## Install
 
 From PowerShell in this folder:
