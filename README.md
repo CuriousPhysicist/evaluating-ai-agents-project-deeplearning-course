@@ -3,6 +3,7 @@
 A command-line evaluation harness for a tool-using sales assistant. It records agent runs in local Phoenix, evaluates router and skill behavior separately, measures convergence across similar questions, and compares version results.
 
 Project documentation (spec, QA reviews, design, progress records) lives in [docs/](docs/index.md) and is set up for GitHub Pages.
+The [pre-refactor test harness snapshot](archive/pre-refactor-test-harness/README.md) is retained as historical QA evidence.
 
 ## Documentation preview
 

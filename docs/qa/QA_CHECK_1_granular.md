@@ -23,9 +23,9 @@ returning a scripted value alone is not an assertion. Scores describe
 coverage evidence, not test outcomes or the probability of correctness.
 
 In the table, test names refer to the
-[archived test harness](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/old_test_files/tests/test_core.py.txt).
-The [historical stand-in](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/old_test_files/agent_evals/scripted.py.txt) and
-[setup definitions](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/old_test_files/agent_evals/__main__.py.txt) provide
+[archived test harness](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/archive/pre-refactor-test-harness/tests/test_core.py.txt).
+The [historical stand-in](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/archive/pre-refactor-test-harness/agent_evals/scripted.py.txt) and
+[setup definitions](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/archive/pre-refactor-test-harness/agent_evals/__main__.py.txt) provide
 context; their existence is not itself test coverage.
 
 ## Coverage by spec condition

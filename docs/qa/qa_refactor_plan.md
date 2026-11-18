@@ -26,7 +26,7 @@ This branch seeks to address this deficiency, in the process developing a suitab
   Assurance score below. Scores are review judgements, not test results or
   probabilities of correctness.
 - **Historical comparison:** Archived the original harness as non-executable
-  text in [old_test_files](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/tree/main/old_test_files). The
+  text in the [pre-refactor test harness archive](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/tree/main/archive/pre-refactor-test-harness). The
   [granular comparison](score_comparison_2.md), using equal weights,
   estimates **42.86% historically** versus **90.48% reassessed**, an increase
   of **47.62 percentage points**.
