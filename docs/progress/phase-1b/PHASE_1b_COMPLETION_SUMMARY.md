@@ -282,7 +282,7 @@ open report.html
 ```python
 from agent_evals.compliance_reporter import JSONReporter
 
-reporter = JSONReporter("requirements/t1-t21-spec.yaml", ".compliance_results.json")
+reporter = JSONReporter("specifications/compliance/t1-t21-spec.yaml", ".compliance_results.json")
 compliance = reporter.calculate_compliance()
 print(f"Score: {compliance.overall_score:.2%}")
 print(f"Passed: {compliance.aggregate['total_pass']}")
@@ -397,4 +397,4 @@ The pytest plugin seamlessly integrates with existing tests, automatically colle
 - [Phase 1: Architecture](../../design/Phase_1_Scoring_Architecture.md)
 - [Pytest Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)
 - [CI/CD Setup Guide](PHASE_1b_CI_CD_SETUP.md)
-- [Requirements Specification](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/t1-t21-spec.yaml)
+- [Requirements Specification](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/specifications/compliance/t1-t21-spec.yaml)

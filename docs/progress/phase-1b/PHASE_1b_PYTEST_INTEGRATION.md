@@ -88,7 +88,7 @@ from pathlib import Path
 
 # Generate JSON report
 report = generate_compliance_report(
-    spec_file=Path("requirements/t1-t21-spec.yaml"),
+    spec_file=Path("specifications/compliance/t1-t21-spec.yaml"),
     results_file=Path(".compliance_results.json"),
     format="json",
     output_file=Path("compliance_report.json")
@@ -96,7 +96,7 @@ report = generate_compliance_report(
 
 # Generate HTML report
 html_report = generate_compliance_report(
-    spec_file=Path("requirements/t1-t21-spec.yaml"),
+    spec_file=Path("specifications/compliance/t1-t21-spec.yaml"),
     results_file=Path(".compliance_results.json"),
     format="html",
     output_file=Path("compliance_report.html")
@@ -104,7 +104,7 @@ html_report = generate_compliance_report(
 
 # Generate console report (print to stdout)
 console_report = generate_compliance_report(
-    spec_file=Path("requirements/t1-t21-spec.yaml"),
+    spec_file=Path("specifications/compliance/t1-t21-spec.yaml"),
     results_file=Path(".compliance_results.json"),
     format="console"
 )
@@ -117,7 +117,7 @@ print(console_report)
 from agent_evals.compliance_reporter import JSONReporter
 
 reporter = JSONReporter(
-    spec_file="requirements/t1-t21-spec.yaml",
+    spec_file="specifications/compliance/t1-t21-spec.yaml",
     results_file=".compliance_results.json"
 )
 
@@ -139,7 +139,7 @@ json_output = reporter.generate(output_file="report.json")
 ```json
 {
   "metadata": {
-    "spec_file": "requirements/t1-t21-spec.yaml",
+    "spec_file": "specifications/compliance/t1-t21-spec.yaml",
     "results_file": ".compliance_results.json"
   },
   "compliance_score": {
@@ -342,7 +342,7 @@ Verbose mode shows what's being collected.
 ```python
 from pathlib import Path
 
-spec_file = Path("requirements/t1-t21-spec.yaml")
+spec_file = Path("specifications/compliance/t1-t21-spec.yaml")
 assert spec_file.exists(), f"Spec not found at {spec_file}"
 
 reporter = JSONReporter(spec_file, results_file)
@@ -384,6 +384,6 @@ Planned enhancements:
 
 - [Phase 1a: Generic Compliance Scoring Engine](../phase-1a/PHASE_1_IMPLEMENTATION.md)
 - [Phase 1: Architecture & Design](../../design/Phase_1_Scoring_Architecture.md)
-- [T1-T21 Specification](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/t1-t21-spec.yaml)
+- [T1-T21 Specification](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/specifications/compliance/t1-t21-spec.yaml)
 - [Pytest Plugin API](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/agent_evals/pytest_plugin.py)
 - [Compliance Reporter API](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/agent_evals/compliance_reporter.py)

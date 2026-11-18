@@ -82,7 +82,7 @@ tests/
 ├── test_assurance.py              # 25 tests with ASSURANCE_* markers (modified)
 └── test_pytest_plugin.py           # 15+ new integration tests (288 lines)
 
-requirements/
+specifications/compliance/
 ├── t1-t21-spec.yaml               # (Phase 1a - reference)
 └── schema.json                    # (Phase 1a - reference)
 
@@ -202,7 +202,7 @@ pytest plugin collects test outcomes
 **Key Integration Points:**
 - `spec_assurance.calculate_compliance_score()` - Scoring logic
 - `spec_assurance.load_spec_from_yaml()` - Requirement loading
-- `requirements/t1-t21-spec.yaml` - Requirement definitions
+- `specifications/compliance/t1-t21-spec.yaml` - Requirement definitions
 - Pytest marker system - Test organization
 
 ---
@@ -253,7 +253,7 @@ compliance-check --fail-if-below
 
 ### Invalid Spec File
 **Problem:** "FileNotFoundError: Spec file..."
-**Solution:** Ensure spec path is correct: `requirements/t1-t21-spec.yaml`
+**Solution:** Ensure spec path is correct: `specifications/compliance/t1-t21-spec.yaml`
 
 See **[Pytest Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)** for more troubleshooting
 

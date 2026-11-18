@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import json
 import pytest
+from click.testing import CliRunner
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 from agent_evals.pytest_plugin import CompliancePlugin
+from agent_evals.cli_compliance import compliance
 from agent_evals.pytest_plugin_config import CompliancePluginConfig, load_config_from_dict
 from agent_evals.compliance_reporter import (
     JSONReporter,
@@ -59,6 +61,17 @@ class TestCompliancePluginConfig:
 
         with pytest.raises(ValueError):
             CompliancePluginConfig(fail_below_threshold=101.0)
+
+
+def test_compliance_report_uses_relocated_default_spec(tmp_path, monkeypatch):
+    monkeypatch.chdir(Path(__file__).resolve().parents[1])
+    results = tmp_path / "results.json"
+    results.write_text(json.dumps({"marker_results": {}, "test_results": {}}), encoding="utf-8")
+
+    result = CliRunner().invoke(compliance, ["report", str(results), "--format", "json"])
+
+    assert result.exit_code == 0, result.output
+    assert len(json.loads(result.output)["per_requirement"]) == 21
 
 
 class TestCompliancePlugin:

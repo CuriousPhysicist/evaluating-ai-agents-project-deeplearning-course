@@ -7,8 +7,8 @@ nav_order: 3
 # Repository structure: work in progress
 
 **Last updated:** 18 November 2026<br>
-**Status:** Runtime inputs have been grouped; existing workspaces require
-manual migration. Moving compliance specifications remains proposed.
+**Status:** Runtime inputs and compliance specifications have been grouped;
+existing workspaces require manual migration.
 
 ## Completed
 
@@ -18,7 +18,8 @@ manual migration. Moving compliance specifications remains proposed.
   [pre-refactor archive](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/tree/main/archive/pre-refactor-test-harness)
   and updated its QA references (commit `2e31cae`). Its README records the
   source commit and explains that the snapshot is historical evidence.
-- Grouped runtime inputs under `inputs/`. Updated dependent code, tests,
+- Grouped runtime inputs under `inputs/` and moved the compliance specification
+  and schema to `specifications/compliance/`. Updated dependent code, tests,
   documentation and the source specification's path wording.
 
 ## Current categories
@@ -28,7 +29,7 @@ manual migration. Moving compliance specifications remains proposed.
 | `inputs/data/` | Sample sales data used by the running agent. |
 | `inputs/datasets/` | Question sets used for evaluation and Phoenix uploads. |
 | `inputs/versions/` | Agent version settings. |
-| `requirements/` | Compliance specification and schema, not Python dependencies. |
+| `specifications/compliance/` | Compliance specification and schema, not Python dependencies. |
 | `results/` | Generated local results and logs, separate from tracked inputs. |
 | `archive/pre-refactor-test-harness/` | Historical QA evidence, not the current tests. |
 | `pyproject.toml` | Python project configuration and dependencies. |
@@ -36,10 +37,6 @@ manual migration. Moving compliance specifications remains proposed.
 The sample data, datasets and version files are runtime inputs, even though
 tests also use them. Setup creates missing inputs; it does not overwrite
 existing ones.
-
-## Proposed follow-up
-
-- Move the compliance specification and schema to a clearer location.
 
 ## Migration decision
 

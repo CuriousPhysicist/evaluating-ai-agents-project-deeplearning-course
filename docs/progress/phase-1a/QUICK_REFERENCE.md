@@ -38,7 +38,7 @@ agent_evals/spec_assurance/
 
 ### Configuration
 ```
-requirements/
+specifications/compliance/
 ├── schema.json              JSON Schema for specs
 └── t1-t21-spec.yaml         All 21 T-requirements
 ```
@@ -78,7 +78,7 @@ from agent_evals.spec_assurance import (
 )
 
 # Load T1-T21 specification
-spec = load_spec_from_yaml("requirements/t1-t21-spec.yaml")
+spec = load_spec_from_yaml("specifications/compliance/t1-t21-spec.yaml")
 
 # Map test outcomes to markers
 test_results = {
@@ -215,7 +215,7 @@ weight_constraints:
 
 ### JSON Schema
 
-Defined in `requirements/schema.json`:
+Defined in `specifications/compliance/schema.json`:
 - Validates all required fields
 - Type constraints
 - Enum validation
@@ -306,8 +306,8 @@ pytest --no-cov
 | **Completion Summary** | `PHASE_1_COMPLETION_SUMMARY.md` |
 | **Verification Checklist** | `PHASE_1_CHECKLIST.md` |
 | **Usage Examples** | `examples/spec_assurance_example.py` |
-| **T1-T21 Specification** | `requirements/t1-t21-spec.yaml` |
-| **Spec Schema** | `requirements/schema.json` |
+| **T1-T21 Specification** | `specifications/compliance/t1-t21-spec.yaml` |
+| **Spec Schema** | `specifications/compliance/schema.json` |
 
 ---
 

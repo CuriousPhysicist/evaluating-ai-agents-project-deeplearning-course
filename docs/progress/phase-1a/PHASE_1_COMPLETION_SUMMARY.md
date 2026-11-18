@@ -23,13 +23,13 @@ grand_parent: Progress records
 
 ### ✅ Objective 2: Define Requirement Specification Format
 **Result:** Complete  
-- JSON Schema for requirement specs (`requirements/schema.json`)
+- JSON Schema for requirement specs (`specifications/compliance/schema.json`)
 - Pydantic-validated specification loading
 - Support for YAML, JSON, and Python dict inputs
 
 ### ✅ Objective 3: Express T1-T21 as Configuration
 **Result:** Complete  
-- All 21 requirements in `requirements/t1-t21-spec.yaml`
+- All 21 requirements in `specifications/compliance/t1-t21-spec.yaml`
 - Each requirement includes markers, description, weight, notes
 - Configuration-based, not code-based
 
@@ -58,7 +58,7 @@ agent_evals/spec_assurance/
 ### Configuration Files
 
 ```
-requirements/
+specifications/compliance/
 ├── schema.json                     # JSON Schema (93 lines)
 └── t1-t21-spec.yaml                # T1-T21 requirements (153 lines)
                         Total: 246 lines
@@ -239,7 +239,7 @@ from agent_evals.spec_assurance import (
 )
 
 # Load spec
-spec = load_spec_from_yaml("requirements/t1-t21-spec.yaml")
+spec = load_spec_from_yaml("specifications/compliance/t1-t21-spec.yaml")
 
 # Map test outcomes
 test_results = {
@@ -341,8 +341,8 @@ if delta < 0:
 
 ### For Understanding Design
 - Read: `docs/design/Phase_1_Scoring_Architecture.md`
-- Reference: `requirements/schema.json` (spec format)
-- Reference: `requirements/t1-t21-spec.yaml` (example spec)
+- Reference: `specifications/compliance/schema.json` (spec format)
+- Reference: `specifications/compliance/t1-t21-spec.yaml` (example spec)
 
 ### For Contributing
 - Look at: `tests/test_spec_assurance.py` (test examples)
@@ -390,7 +390,7 @@ adherence to arbitrary requirement specifications. This enables:
 
 **Components Added:**
 - agent_evals/spec_assurance/ (5 modules, 475 lines)
-- requirements/ (schema.json + t1-t21-spec.yaml)
+- specifications/compliance/ (schema.json + t1-t21-spec.yaml)
 - tests/test_spec_assurance.py (30 tests)
 - Documentation and examples
 

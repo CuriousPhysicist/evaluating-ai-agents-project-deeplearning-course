@@ -62,14 +62,14 @@ A new Python package providing the compliance scoring framework:
 
 ### 2. Requirement Specification Format
 
-#### Schema: `requirements/schema.json`
+#### Schema: `specifications/compliance/schema.json`
 - JSON Schema defining valid requirement specs
 - Enforces required fields: id, description, weight
 - Optional fields: test_markers, evidence_sources, notes
 - Validates weight constraints
 - Validates evidence source types
 
-#### T1-T21 Specification: `requirements/t1-t21-spec.yaml`
+#### T1-T21 Specification: `specifications/compliance/t1-t21-spec.yaml`
 - All 21 requirements defined as YAML configuration
 - Each requirement includes:
   - `id`: Unique identifier (T1–T21)
@@ -115,7 +115,7 @@ from agent_evals.spec_assurance import (
 )
 
 # Load specification
-spec = load_spec_from_yaml("requirements/t1-t21-spec.yaml")
+spec = load_spec_from_yaml("specifications/compliance/t1-t21-spec.yaml")
 
 # Map pytest markers to test outcomes
 test_results = {
@@ -278,7 +278,7 @@ agent_evals/
 │   ├── evidence_gatherer.py      # Gather test evidence
 │   └── scorer.py                # Calculate scores
 │
-requirements/
+specifications/compliance/
 ├── schema.json                  # JSON Schema for specs
 └── t1-t21-spec.yaml             # T1-T21 specification
 │
@@ -351,6 +351,6 @@ qa_information/
 
 - [Phase 1 Architecture Decision](../../design/Phase_1_Scoring_Architecture.md)
 - [QA Refactor Plan](../../qa/qa_refactor_plan.md)
-- [T1-T21 Specification YAML](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/t1-t21-spec.yaml)
-- [Requirement Spec JSON Schema](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/schema.json)
+- [T1-T21 Specification YAML](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/specifications/compliance/t1-t21-spec.yaml)
+- [Requirement Spec JSON Schema](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/specifications/compliance/schema.json)
 - [Example Usage](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/examples/spec_assurance_example.py)

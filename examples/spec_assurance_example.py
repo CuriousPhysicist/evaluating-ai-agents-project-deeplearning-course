@@ -18,7 +18,7 @@ from agent_evals.spec_assurance import (
 def example_basic_scoring():
     """Basic example: Load spec and calculate score."""
     # Load the T1-T21 specification
-    spec_path = Path(__file__).parent.parent / "requirements" / "t1-t21-spec.yaml"
+    spec_path = Path(__file__).parent.parent / "specifications" / "compliance" / "t1-t21-spec.yaml"
     spec = load_spec_from_yaml(spec_path)
 
     # Simulate test results (in real use, these come from pytest)
@@ -58,7 +58,7 @@ def example_basic_scoring():
 
 def example_regression_check():
     """Example: Check if score dropped from baseline."""
-    spec_path = Path(__file__).parent.parent / "requirements" / "t1-t21-spec.yaml"
+    spec_path = Path(__file__).parent.parent / "specifications" / "compliance" / "t1-t21-spec.yaml"
     spec = load_spec_from_yaml(spec_path)
 
     # Baseline results (previous run)

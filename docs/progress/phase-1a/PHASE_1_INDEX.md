@@ -50,7 +50,7 @@ grand_parent: Progress records
 **Key Innovation:** Generic (works with any requirement spec)  
 **Lines:** ~475 (core code), 100% test coverage on scorer
 
-#### `requirements/` - Specification Definitions
+#### `specifications/compliance/` - Specification Definitions
 - **`schema.json`** – JSON Schema for requirement specs
 - **`t1-t21-spec.yaml`** – T1-T21 requirements as YAML config
 
@@ -109,7 +109,7 @@ from agent_evals.spec_assurance import (
     load_spec_from_yaml,
 )
 
-spec = load_spec_from_yaml("requirements/t1-t21-spec.yaml")
+spec = load_spec_from_yaml("specifications/compliance/t1-t21-spec.yaml")
 test_results = {"T1_setup": "pass", "T2_upload": "fail", ...}
 result = calculate_compliance_score(spec, test_results)
 

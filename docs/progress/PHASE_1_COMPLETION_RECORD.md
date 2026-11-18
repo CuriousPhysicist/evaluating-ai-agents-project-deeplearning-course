@@ -61,8 +61,8 @@ nav_order: 9
 
 #### 2. Configuration & Schema
 
-- `requirements/schema.json` - JSON Schema enforcing spec format
-- `requirements/t1-t21-spec.yaml` - All 21 T-requirements with markers and weights
+- `specifications/compliance/schema.json` - JSON Schema enforcing spec format
+- `specifications/compliance/t1-t21-spec.yaml` - All 21 T-requirements with markers and weights
 
 #### 3. Test Suite
 

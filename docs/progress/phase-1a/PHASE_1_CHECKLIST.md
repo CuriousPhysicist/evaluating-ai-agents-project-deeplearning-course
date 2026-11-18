@@ -47,13 +47,13 @@ grand_parent: Progress records
 
 ## Configuration Files
 
-- ✅ **requirements/schema.json** (2,974 bytes)
+- ✅ **specifications/compliance/schema.json** (2,974 bytes)
   - JSON Schema for requirement specs
   - Validates all required fields
   - Type constraints and patterns
   - Extensible properties
 
-- ✅ **requirements/t1-t21-spec.yaml** (5,615 bytes)
+- ✅ **specifications/compliance/t1-t21-spec.yaml** (5,615 bytes)
   - All 21 requirements defined
   - Pytest markers for each
   - Equal weights (1.0 each)

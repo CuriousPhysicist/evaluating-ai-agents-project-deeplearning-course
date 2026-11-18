@@ -71,12 +71,12 @@ Five independently testable modules:
 
 ### 2. Configuration Files
 
-- **`requirements/schema.json`** (2,974 bytes)
+- **`specifications/compliance/schema.json`** (2,974 bytes)
   - JSON Schema for requirement specs
   - Validates format and constraints
   - Extensible for future use
 
-- **`requirements/t1-t21-spec.yaml`** (5,615 bytes)
+- **`specifications/compliance/t1-t21-spec.yaml`** (5,615 bytes)
   - All 21 T-requirements defined
   - Pytest markers for each
   - Equal weights (1.0 each)
@@ -282,7 +282,7 @@ agent_evals/spec_assurance/
 ├── evidence_gatherer.py              (new)
 └── scorer.py                        (new)
 
-requirements/
+specifications/compliance/
 ├── schema.json                      (new)
 └── t1-t21-spec.yaml                 (new)
 

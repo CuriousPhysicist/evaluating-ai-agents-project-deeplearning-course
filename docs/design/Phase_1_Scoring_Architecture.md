@@ -73,7 +73,7 @@ agent_evals/
 │   ├── scorer.py                # Generic scoring logic
 │   └── validator.py             # Validate specs and results
 │
-├── requirements/                 # Requirement definitions
+├── specifications/compliance/                 # Requirement definitions
 │   ├── t1-t21-spec.yaml         # T1-T21 expressed as config
 │   └── schema.json              # JSON Schema for requirement specs
 │
@@ -93,7 +93,7 @@ tests/
 ## Requirement Spec Format (Proposal)
 
 ```yaml
-# requirements/t1-t21-spec.yaml
+# specifications/compliance/t1-t21-spec.yaml
 metadata:
   version: "1.0"
   description: "T1-T21 requirements from evaluating-ai-agents specification"
@@ -205,7 +205,7 @@ def calculate_compliance_score(requirements_spec, test_results, manual_reviews=N
 - [ ] Implement `evidence_gatherer.py` to map pytest markers to test outcomes
 - [ ] Implement `scorer.py` with generic scoring logic
 - [ ] Add comprehensive tests for the scorer itself
-- [ ] Create `requirements/t1-t21-spec.yaml` defining all 21 requirements
+- [ ] Create `specifications/compliance/t1-t21-spec.yaml` defining all 21 requirements
 
 ### Phase 1b: Integration & CI/CD
 - [ ] Integrate with pytest (custom plugin or post-test hook)

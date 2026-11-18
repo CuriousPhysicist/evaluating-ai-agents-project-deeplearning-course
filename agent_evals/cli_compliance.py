@@ -29,7 +29,7 @@ def compliance():
 @click.option(
     "--spec",
     type=click.Path(exists=True, path_type=Path),
-    default="requirements/t1-t21-spec.yaml",
+    default="specifications/compliance/t1-t21-spec.yaml",
     help="Path to requirements specification YAML file",
 )
 @click.option(
@@ -73,7 +73,7 @@ def report_command(
         compliance-report custom_results.json
         
         # All options
-        compliance-report myresults.json --spec requirements/spec.yaml \\
+        compliance-report myresults.json --spec specifications/compliance/t1-t21-spec.yaml \\
             --format html --output report.html --verbose
     """
     try:
@@ -117,7 +117,7 @@ def report_command(
 @click.option(
     "--spec",
     type=click.Path(exists=True, path_type=Path),
-    default="requirements/t1-t21-spec.yaml",
+    default="specifications/compliance/t1-t21-spec.yaml",
     help="Path to requirements specification YAML file",
 )
 @click.option(
@@ -221,7 +221,7 @@ def check_command(
 @click.option(
     "--spec",
     type=click.Path(exists=True, path_type=Path),
-    default="requirements/t1-t21-spec.yaml",
+    default="specifications/compliance/t1-t21-spec.yaml",
     help="Path to requirements specification YAML file",
 )
 def summary_command(results_file: Path, spec: Path):

@@ -62,7 +62,7 @@ jobs:
             
             # Generate JSON report
             generate_compliance_report(
-                spec_file=Path('requirements/t1-t21-spec.yaml'),
+                spec_file=Path('specifications/compliance/t1-t21-spec.yaml'),
                 results_file=Path('compliance_results.json'),
                 format='json',
                 output_file=Path('compliance_report.json')
@@ -70,7 +70,7 @@ jobs:
             
             # Generate HTML report
             generate_compliance_report(
-                spec_file=Path('requirements/t1-t21-spec.yaml'),
+                spec_file=Path('specifications/compliance/t1-t21-spec.yaml'),
                 results_file=Path('compliance_results.json'),
                 format='html',
                 output_file=Path('compliance_report.html')
@@ -180,7 +180,7 @@ report:compliance:
         
         # Generate HTML report
         generate_compliance_report(
-            spec_file=Path('requirements/t1-t21-spec.yaml'),
+            spec_file=Path('specifications/compliance/t1-t21-spec.yaml'),
             results_file=Path('compliance_results.json'),
             format='html',
             output_file=Path('compliance_report.html')
@@ -193,7 +193,7 @@ report:compliance:
         # Extract marker outcomes and calculate score
         from agent_evals.spec_assurance import calculate_compliance_score, load_spec_from_yaml
         
-        spec = load_spec_from_yaml('requirements/t1-t21-spec.yaml')
+        spec = load_spec_from_yaml('specifications/compliance/t1-t21-spec.yaml')
         marker_outcomes = {}
         
         for marker, data in results.get('marker_results', {}).items():
@@ -263,7 +263,7 @@ pipeline {
                         from pathlib import Path
                         
                         generate_compliance_report(
-                            spec_file=Path('requirements/t1-t21-spec.yaml'),
+                            spec_file=Path('specifications/compliance/t1-t21-spec.yaml'),
                             results_file=Path('compliance_results.json'),
                             format='html',
                             output_file=Path('compliance_report.html')
@@ -340,7 +340,7 @@ def check_compliance(results_file: Path, threshold: float = 0.80) -> bool:
     from agent_evals.spec_assurance import calculate_compliance_score, load_spec_from_yaml
     
     # Load spec
-    spec = load_spec_from_yaml(Path("requirements/t1-t21-spec.yaml"))
+    spec = load_spec_from_yaml(Path("specifications/compliance/t1-t21-spec.yaml"))
     
     # Build marker outcomes from results
     marker_outcomes = {}
@@ -430,7 +430,7 @@ python -c "
   from agent_evals.compliance_reporter import generate_compliance_report
   from pathlib import Path
   generate_compliance_report(
-      Path('requirements/t1-t21-spec.yaml'),
+      Path('specifications/compliance/t1-t21-spec.yaml'),
       Path('compliance_results.json'),
       format='json',
       output_file=Path('report.json')
@@ -442,7 +442,7 @@ python -c "
   from agent_evals.compliance_reporter import generate_compliance_report
   from pathlib import Path
   generate_compliance_report(
-      Path('requirements/t1-t21-spec.yaml'),
+      Path('specifications/compliance/t1-t21-spec.yaml'),
       Path('compliance_results.json'),
       format='html',
       output_file=Path('report.html')
@@ -545,5 +545,5 @@ python scripts/check_compliance.py ... || exit 1
 
 - [Pytest Integration Guide](PHASE_1b_PYTEST_INTEGRATION.md)
 - [Phase 1a: Scoring Engine](../phase-1a/PHASE_1_IMPLEMENTATION.md)
-- [Requirements Specification](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/requirements/t1-t21-spec.yaml)
+- [Requirements Specification](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course/blob/main/specifications/compliance/t1-t21-spec.yaml)
 {% endraw %}
