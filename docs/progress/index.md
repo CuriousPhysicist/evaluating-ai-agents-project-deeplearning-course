@@ -11,6 +11,9 @@ permalink: /progress/
 **Purpose:** Navigation guide for completion records and progress assessments  
 **Status:** ✅ All desired outcomes achieved
 
+[Repository structure (work in progress)](repository-structure.md) tracks the
+separate, ongoing repository reorganization.
+
 ---
 
 ## 🎯 Quick Start
