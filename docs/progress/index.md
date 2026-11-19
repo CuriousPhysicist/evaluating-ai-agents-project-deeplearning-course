@@ -5,11 +5,11 @@ nav_order: 5
 permalink: /progress/
 ---
 
-# Progress Record Index - Phase 1a & 1b Completion
+# Progress Record Index - Phase 1a, 1b & 1c Phases
 
-**Date:** 17 November 2026  
-**Purpose:** Navigation guide for completion records and progress assessments  
-**Status:** ✅ All desired outcomes achieved
+**Date:** 19 November 2026  
+**Purpose:** Navigation guide for completion records, progress assessments, and ongoing phases  
+**Status:** Phase 1a & 1b ✅ Complete | Phase 1c ✅ Phase 1 In Progress
 
 [Repository structure (work in progress)](repository-structure.md) tracks the
 separate, ongoing repository reorganization.
@@ -194,6 +194,26 @@ separate, ongoing repository reorganization.
 - CI/CD setup
 - Usage patterns
 - Design rationale
+
+---
+
+#### Phase 1c Documentation
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| [phase-1c/index.md](phase-1c/index.md) | Phase 1c overview & navigation | Developers, reviewers |
+| [CI_CD_GATING_PLAN.md](phase-1c/CI_CD_GATING_PLAN.md) | Complete implementation plan (4 phases) | Architects, leads, planners |
+| [CI_CD_GATING_PHASE_1_PROGRESS.md](phase-1c/CI_CD_GATING_PHASE_1_PROGRESS.md) | Phase 1 implementation summary | Developers, reviewers |
+| [COMPLIANCE_CHECKING_GUIDE.md](phase-1c/COMPLIANCE_CHECKING_GUIDE.md) | Compliance checking usage guide | Users, developers |
+
+**When to Reference:**
+- Understanding exit code contract
+- Compliance checking framework
+- Threshold configuration
+- CI/CD integration patterns
+- Usage examples and best practices
+
+**Status:** Phase 1 Complete ✅ (52 tests passing, 100% pass rate)
 
 ---
 

@@ -1,0 +1,87 @@
+# Compliance Gating Thresholds
+# 
+# Used by CI/CD pipeline to determine pass/fail status based on compliance scores.
+# Each environment can have different thresholds to balance strictness with practicality.
+#
+# Configuration structure:
+#   defaults: Global defaults applied when environment-specific values not set
+#   environments: Environment-specific overrides (development, staging, production)
+#   baselines: Baseline scores used for regression detection
+
+# Default thresholds applied to all environments
+defaults:
+  # Overall compliance score must be >= this value
+  # Scale: 0.0 (no requirements met) to 1.0 (all requirements exceed expectations)
+  overall_score: 0.80
+  
+  # Each individual requirement must be >= this value
+  # This prevents cases where overall high score masks weak requirements
+  per_requirement: 0.50
+  
+  # Maximum allowed regression from baseline before failing the check
+  # Example: if baseline was 0.90 and regression_allowed is 0.05,
+  # then current score must be >= 0.85
+  regression_allowed: 0.05
+
+# Environment-specific thresholds
+# Override defaults when specified environment is selected
+environments:
+  # Development: Lower thresholds for experimentation
+  development:
+    overall_score: 0.70
+    per_requirement: 0.40
+    regression_allowed: 0.10
+  
+  # Staging: Medium thresholds before production
+  staging:
+    overall_score: 0.80
+    per_requirement: 0.50
+    regression_allowed: 0.05
+  
+  # Production: Highest thresholds for quality assurance
+  production:
+    overall_score: 0.90
+    per_requirement: 0.75
+    regression_allowed: 0.00
+
+# Baseline scores for regression detection
+# Used to compare current scores against previous versions
+# 'current' baseline represents the main branch
+baselines:
+  current:
+    # Version identifier (can be branch name, tag, or commit)
+    version: "main"
+    
+    # Git commit hash (populated at runtime if available)
+    commit: null
+    
+    # Overall compliance score from last successful evaluation
+    # This score represents the "good" state against which to measure regression
+    overall_score: 0.9048
+    
+    # ISO 8601 timestamp when baseline was established
+    timestamp: "2026-11-19T00:00:00Z"
+    
+    # Per-requirement scores (optional, for detailed regression analysis)
+    # requirements:
+    #   T1: 0.95
+    #   T2: 0.90
+    #   ...etc
+
+# Guidance for threshold selection:
+#
+# Overall Score:
+#   - 0.90+ : Production-ready, all requirements well-covered
+#   - 0.80-0.90: Good coverage, minor gaps acceptable
+#   - 0.70-0.80: Acceptable for development, needs improvement
+#   - <0.70: Significant gaps, blockers likely
+#
+# Per-Requirement:
+#   - 0.75+: Well-tested, high confidence
+#   - 0.50-0.75: Adequate coverage, some gaps
+#   - <0.50: Weak coverage, high risk
+#
+# Regression Allowed:
+#   - 0.00: Zero regression tolerance (production)
+#   - 0.05: 5% regression acceptable (staging)
+#   - 0.10+: Flexible regression (development)
