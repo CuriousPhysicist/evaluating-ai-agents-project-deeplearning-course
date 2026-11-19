@@ -31,9 +31,10 @@ separate, ongoing repository reorganization.
 
 ### For Phase 1c Planners
 **Start here:** [PHASE_1c_QUICK_REFERENCE.md](PHASE_1c_QUICK_REFERENCE.md) - One-page summary<br>
-**Then read:** [OUTSTANDING_TASKS_AND_GAPS.md](OUTSTANDING_TASKS_AND_GAPS.md) - Detailed breakdown  
+**Then read:** [OUTSTANDING_TASKS_AND_GAPS.md](OUTSTANDING_TASKS_AND_GAPS.md) - Detailed breakdown<br>
+**Then visualize:** [PHASE_1c_DEPENDENCY_DIAGRAM.md](PHASE_1c_DEPENDENCY_DIAGRAM.md) - Task dependencies & sequencing<br>
 **Reference:** [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) for Phase 1 context  
-**Time:** 20-30 minutes
+**Time:** 30-40 minutes
 
 ### For Stakeholder Updates
 **Use:** [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) - Executive Summary + Key Achievements<br>
@@ -115,6 +116,29 @@ separate, ongoing repository reorganization.
 - **Team Onboarding:** New team members overview
 
 **Link:** [Read PHASE_1c_QUICK_REFERENCE.md](PHASE_1c_QUICK_REFERENCE.md)
+
+---
+
+#### 5. **PHASE_1c_DEPENDENCY_DIAGRAM.md** (11 KB, 340 lines) ⭐ **NEW**
+**Type:** Visual dependency flow and planning guide
+**Key Sections:**
+1. Task dependency flow (Mermaid diagram)
+2. Critical path analysis (3 timelines)
+3. Dependency matrix
+4. Parallel work opportunities
+5. Resource allocation scenarios (small, medium, large teams)
+6. Risk & mitigation
+7. Decision points
+8. Success metrics
+
+**When to Use:**
+- **Phase 1c Planning:** Understand task dependencies and sequencing
+- **Resource Planning:** Allocate team based on critical path
+- **Risk Management:** Identify potential issues early
+- **Timeline Planning:** Choose team scenario (small/medium/large)
+- **Status Tracking:** Monitor progress against plan
+
+**Link:** [Read PHASE_1c_DEPENDENCY_DIAGRAM.md](PHASE_1c_DEPENDENCY_DIAGRAM.md)
 
 ---
 
