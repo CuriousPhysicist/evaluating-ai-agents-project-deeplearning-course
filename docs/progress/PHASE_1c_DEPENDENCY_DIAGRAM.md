@@ -16,53 +16,53 @@ nav_order: 11
 
 ```mermaid
 graph TD
-    START["🟢 Phase 1a & 1b Complete<br/>100% Tests Passing"] --> MERGE["🔴 CRITICAL<br/>Task 1: Merge feat_develop_metric<br/>to main<br/>(1-2 hours)"]
+    START["COMPLETE: Phase 1a & 1b<br/>100% Tests Passing"] --> MERGE["CRITICAL<br/>Task 1: Merge feat_develop_metric<br/>to main<br/>1-2 hours"]
     
-    MERGE --> MERGED["✅ Phase 1b Merged to Main"]
+    MERGE --> MERGED["DONE: Phase 1b Merged to Main"]
     
     MERGED --> SPLIT{Phase 1c Planning}
     
-    SPLIT -->|High Priority Path| QA["🟡 MEDIUM<br/>Task 6: Address Evidence Gaps<br/>T10, T12, T13, T18-T20<br/>(2-3 days)"]
+    SPLIT -->|High Priority| QA["MEDIUM<br/>Task 6: Address Evidence Gaps<br/>T10, T12, T13, T18-T20<br/>2-3 days"]
     
-    SPLIT -->|High Priority Path| CICD["🟠 HIGH<br/>Task 2: CI/CD Compliance Gating<br/>Exit codes + examples<br/>(3-5 days)"]
+    SPLIT -->|High Priority| CICD["HIGH<br/>Task 2: CI/CD Compliance Gating<br/>Exit codes + examples<br/>3-5 days"]
     
-    SPLIT -->|Medium Priority Path| REPO["🟢 LOW<br/>Task 7: Complete Repository<br/>Structure Migration<br/>(1-2 days, in-progress)"]
+    SPLIT -->|Medium Priority| REPO["LOW<br/>Task 7: Complete Repository<br/>Structure Migration<br/>1-2 days, in-progress"]
     
-    SPLIT -->|Medium Priority Path| JEKYLL["🟢 LOW<br/>Task 13: Jekyll Documentation<br/>Site Completion<br/>(1-2 days, in-progress)"]
+    SPLIT -->|Medium Priority| JEKYLL["LOW<br/>Task 13: Jekyll Documentation<br/>Site Completion<br/>1-2 days, in-progress"]
     
-    QA --> QA_DONE["✅ Evidence Confidence<br/>Increased"]
+    QA --> QA_DONE["DONE: Evidence Confidence<br/>Increased"]
     
-    CICD --> CICD_DONE["✅ CI/CD Gates<br/>Ready"]
+    CICD --> CICD_DONE["DONE: CI/CD Gates<br/>Ready"]
     
-    CICD_DONE --> HIST["🟠 HIGH<br/>Task 3: Historical Score<br/>Tracking in Phoenix<br/>(4-6 days)"]
+    CICD_DONE --> HIST["HIGH<br/>Task 3: Historical Score<br/>Tracking in Phoenix<br/>4-6 days"]
     
-    HIST --> HIST_DONE["✅ Time-Series Data<br/>Available"]
+    HIST --> HIST_DONE["DONE: Time-Series Data<br/>Available"]
     
-    HIST_DONE --> DASHBOARD["🟡 MEDIUM<br/>Task 4: Dashboard for<br/>Trend Visualization<br/>(5-7 days)"]
+    HIST_DONE --> DASHBOARD["MEDIUM<br/>Task 4: Dashboard for<br/>Trend Visualization<br/>5-7 days"]
     
-    HIST_DONE --> REGRESSION["🟡 MEDIUM<br/>Task 5: Regression Detection<br/>& Alerts<br/>(3-4 days)"]
+    HIST_DONE --> REGRESSION["MEDIUM<br/>Task 5: Regression Detection<br/>& Alerts<br/>3-4 days"]
     
-    DASHBOARD --> DASHBOARD_DONE["✅ Trends Visualized"]
+    DASHBOARD --> DASHBOARD_DONE["DONE: Trends Visualized"]
     
-    REGRESSION --> REGRESSION_DONE["✅ Alerts Working"]
+    REGRESSION --> REGRESSION_DONE["DONE: Alerts Working"]
     
-    QA_DONE --> PHASE1C_DONE["🎉 Phase 1c Complete"]
+    QA_DONE --> PHASE1C_DONE["Phase 1c Complete"]
     REPO --> PHASE1C_DONE
     JEKYLL --> PHASE1C_DONE
     DASHBOARD_DONE --> PHASE1C_DONE
     REGRESSION_DONE --> PHASE1C_DONE
     
-    PHASE1C_DONE --> PHASE2["🔮 Phase 1d & Beyond"]
+    PHASE1C_DONE --> PHASE2["Phase 1d & Beyond"]
     
-    PHASE2 --> CLI["💡 OPTIONAL<br/>Task 8: CLI Separation<br/>Architecture<br/>(2-3 days)"]
+    PHASE2 --> CLI["OPTIONAL<br/>Task 8: CLI Separation<br/>Architecture<br/>2-3 days"]
     
-    PHASE2 --> EXTRACT["💡 OPTIONAL<br/>Task 9: Extract spec_assurance<br/>as Standalone Package<br/>(3-5 days)"]
+    PHASE2 --> EXTRACT["OPTIONAL<br/>Task 9: Extract spec_assurance<br/>as Standalone Package<br/>3-5 days"]
     
-    PHASE2 --> CUSTOM["💡 OPTIONAL<br/>Task 10: Custom Scoring<br/>Functions Per Requirement<br/>(2-3 days)"]
+    PHASE2 --> CUSTOM["OPTIONAL<br/>Task 10: Custom Scoring<br/>Functions Per Requirement<br/>2-3 days"]
     
-    PHASE2 --> WEBHOOK["💡 OPTIONAL<br/>Task 11: Webhook Notifications<br/>(1-2 days)"]
+    PHASE2 --> WEBHOOK["OPTIONAL<br/>Task 11: Webhook Notifications<br/>1-2 days"]
     
-    PHASE2 --> ANALYSIS["💡 OPTIONAL<br/>Task 12: Advanced Filtering<br/>& Analysis<br/>(2-3 days)"]
+    PHASE2 --> ANALYSIS["OPTIONAL<br/>Task 12: Advanced Filtering<br/>& Analysis<br/>2-3 days"]
     
     CLI -.-> EXTRACT
     EXTRACT -.-> CUSTOM
