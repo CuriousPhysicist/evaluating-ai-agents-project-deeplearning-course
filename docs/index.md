@@ -16,3 +16,29 @@ A command-line evaluation harness for a tool-using sales assistant. It records a
 | [Progress records](progress/index.md) | Phase 1a and 1b implementation and completion records |
 
 Installation and usage are in the repository [README](https://github.com/CuriousPhysicist/evaluating-ai-agents-project-deeplearning-course#readme).
+
+---
+
+## 📖 About This Site
+
+This is a **Jekyll-generated documentation site** built from Markdown files using the [Just-the-docs](https://just-the-docs.github.io/just-the-docs/) theme.
+
+### Building Locally
+
+```bash
+# Install Ruby dependencies
+bundle install
+
+# Build and serve
+bundle exec jekyll serve
+```
+
+The site will be available at `http://localhost:4000`
+
+### Deployment
+
+This site is configured for automatic deployment to GitHub Pages when changes are pushed to `main`.
+
+### New to This Documentation?
+
+[Quick Navigation Guide](SITE_GUIDE.md) →
