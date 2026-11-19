@@ -142,7 +142,41 @@ separate, ongoing repository reorganization.
 
 ---
 
-#### 6. **BRANCH_MERGE_STATUS.md** (10.3 KB) 📋 **Archive**
+#### 6. **GITHUB_ISSUES_PLAN.md** (21.5 KB, 650 lines) ⭐ **NEW**
+**Type:** GitHub issues templates for Phase 1c & Beyond
+**Key Sections:**
+1. Issue creation checklist
+2. Phase 1c Critical: CI/CD Gating (✅ MERGED)
+3. Phase 1c High Priority:
+   - Issue #2: Historical Score Tracking
+   - Issue #3: Dashboard for Trends
+   - Issue #4: Regression Alerts
+4. Phase 1c Medium Priority:
+   - Issue #5: Evidence Gap Closure
+   - Issue #6: Repository Migration
+   - Issue #7: Jekyll Site Completion
+5. Phase 2 & Beyond: CLI separation, extraction, enhancements
+6. Issue tracking best practices
+
+**When to Use:**
+- **Creating GitHub Issues:** Use templates directly
+- **Issue Prioritization:** Effort estimates and dependencies included
+- **Team Coordination:** Share with team for consistent tracking
+- **Status Reporting:** Link to issues for work tracking
+- **Phase Planning:** Reference for scope and sequencing
+
+**Link:** [Read GITHUB_ISSUES_PLAN.md](GITHUB_ISSUES_PLAN.md)
+
+**How to Create Issues:**
+1. Open GitHub repository
+2. Navigate to Issues tab
+3. Click "New Issue"
+4. Use templates from this document
+5. Add labels and assign to team members
+
+---
+
+#### 7. **BRANCH_MERGE_STATUS.md** (10.3 KB) 📋 **Archive**
 **Type:** Branch verification and cleanup record
 **Key Sections:**
 - Branch verification summary

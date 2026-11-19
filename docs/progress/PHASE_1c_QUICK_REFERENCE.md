@@ -129,6 +129,8 @@ Before moving to Phase 1c:
 |----------|---------|--------|
 | [OUTSTANDING_TASKS_AND_GAPS.md](OUTSTANDING_TASKS_AND_GAPS.md) | Detailed task breakdown | ✅ Main reference |
 | [PHASE_1_COMPLETION_RECORD.md](PHASE_1_COMPLETION_RECORD.md) | Phase 1 outcomes | ✅ Completed |
+| [GITHUB_ISSUES_PLAN.md](GITHUB_ISSUES_PLAN.md) | GitHub issues templates | ✅ Ready to create |
+| [PHASE_1c_DEPENDENCY_DIAGRAM.md](PHASE_1c_DEPENDENCY_DIAGRAM.md) | Task dependency flow | ✅ Visualizes dependencies |
 | Phase_1c_Plan.md | Detailed Phase 1c plan | ⏳ Create after kickoff |
 | Phase_1c_CI_CD_Setup.md | CI/CD implementation guide | ⏳ Create in W2 |
 
