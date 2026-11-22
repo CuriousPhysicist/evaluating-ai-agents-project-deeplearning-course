@@ -60,6 +60,7 @@ def setup(root: Path | None = None, *, client: Any | None = None) -> None:
     convergence_path = runtime_input_path(root, "datasets", "convergence_questions.json")
     v1_path = runtime_input_path(root, "versions", "v1.json")
     v2_path = runtime_input_path(root, "versions", "v2.json")
+    # Ensure the results directory exists
     if not data_path.exists():
         data_path.parent.mkdir(parents=True, exist_ok=True)
         frame = pd.DataFrame(
@@ -68,7 +69,7 @@ def setup(root: Path | None = None, *, client: Any | None = None) -> None:
         )
         frame["Sold_Date"] = pd.to_datetime(frame["Sold_Date"]).dt.date
         frame.to_parquet(data_path, index=False)
-
+    # Generate overall questions dataset if missing
     if not overall_path.exists():
         frame = pd.read_parquet(data_path)
         with duckdb.connect() as connection:
@@ -83,7 +84,7 @@ def setup(root: Path | None = None, *, client: Any | None = None) -> None:
                 for question, sql in OVERALL_CASES
             ]
         _write_json_if_missing(overall_path, cases)
-
+    # Generate convergence questions dataset if missing
     _write_json_if_missing(
         convergence_path,
         [{"question": question} for question in SIMILAR_QUESTIONS],
@@ -105,21 +106,33 @@ def setup(root: Path | None = None, *, client: Any | None = None) -> None:
 def main() -> None:
     """Parse CLI arguments and dispatch to the requested command."""
     parser = argparse.ArgumentParser(prog="python -m agent_evals")
+
+    # Define subcommands for the CLI interface
     subparsers = parser.add_subparsers(dest="command", required=True)
+    # Subcommand for initial setup of the environment
     subparsers.add_parser("setup")
+    # Subcommand for asking a question to the agent
     ask_parser = subparsers.add_parser("ask")
     ask_parser.add_argument("question")
     ask_parser.add_argument("--version", default="v1")
+    # Subcommand for evaluating a specific version of the agent
     evaluate_parser = subparsers.add_parser("evaluate")
     evaluate_parser.add_argument("--version", required=True)
+    # Subcommand for comparing agent versions
     subparsers.add_parser("compare")
+    # Subcommand for exporting an assurance snapshot
     assurance_parser = subparsers.add_parser("assurance")
     assurance_parser.add_argument("--snapshot", type=Path, required=True)
     assurance_parser.add_argument("--weights", type=Path, help="Weight profile for a snapshot without inline weights")
+    # Subcommand for comparing assurance experiments
     assurance_compare_parser = subparsers.add_parser("assurance-compare")
     assurance_compare_parser.add_argument("--baseline", required=True, help="Baseline Phoenix experiment ID")
     assurance_compare_parser.add_argument("--candidate", required=True, help="Candidate Phoenix experiment ID")
+
+    # Dispatch to the appropriate command handler based on the parsed arguments
     args = parser.parse_args()
+
+    # Handle the parsed command and invoke the corresponding functionality
     if args.command == "setup":
         setup()
     elif args.command == "ask":
