@@ -13,6 +13,7 @@ Design decisions for the compliance scoring engine and system architecture.
 | Document | Purpose | Scope |
 |----------|---------|-------|
 | [Phase 1 Scoring Architecture](Phase_1_Scoring_Architecture.md) | Architectural decisions for scoring engine | Phase 1 |
+| [Data Model Architecture](Data_Model_Architecture.md) | Layered data model patterns (Domain Models vs Output Schemas) | Ongoing |
 | [CLI and Module Refactoring Strategy](CLI_Module_Refactoring_Strategy.md) | Proactive guidance for anticipated refactoring as code grows | Ongoing |
 | [Phase 1a Implementation](../progress/phase-1a/PHASE_1_IMPLEMENTATION.md) | Technical design and implementation details | Phase 1a |
 | [Phase 1b Plan](../progress/phase-1b/PHASE_1b_PLAN.md) | Pytest integration and CI/CD design | Phase 1b |

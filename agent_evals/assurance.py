@@ -36,6 +36,8 @@ REQUIREMENT_IDS = tuple(f"T{number}" for number in range(1, 22))
 DATASET_NAME = "spec-assurance-t1-t21-v1"
 NonEmptyText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
+# ========== Domain Models (Validation & Business Logic) ==========
+
 
 class RequirementAssessment(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
@@ -238,6 +240,8 @@ def export_assurance_snapshot(snapshot: AssuranceSnapshot, client: Client) -> di
         "dataset_id": run["dataset_id"],
         "score": snapshot.score,
     }
+
+# ========== Output Schemas (Export & API Contracts) ==========
 
 
 class ReviewResult(TypedDict):
