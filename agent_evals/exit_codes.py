@@ -77,64 +77,63 @@ class ComplianceFailureReason(Enum):
     UNKNOWN_ERROR = "Unknown error occurred"
 
 
-class ConfigurationError(Exception):
+class ComplianceCheckException(Exception):
+    """Base class for compliance check exceptions."""
+
+    def __init__(
+        self,
+        message: str,
+        reason: ComplianceFailureReason,
+        exit_code: int,
+    ):
+        self.message = message
+        self.reason = reason
+        self.exit_code = exit_code
+        super().__init__(self.message)
+
+
+class ConfigurationError(ComplianceCheckException):
     """Raised when configuration is invalid or missing."""
 
     def __init__(
         self,
         message: str,
         reason: ComplianceFailureReason = ComplianceFailureReason.CONFIG_MISSING_THRESHOLD,
-        exit_code: int = ExitCode.CONFIGURATION_ERROR,
     ):
-        self.message = message
-        self.reason = reason
-        self.exit_code = exit_code
-        super().__init__(self.message)
+        super().__init__(message, reason, ExitCode.CONFIGURATION_ERROR)
 
 
-class ComplianceRegressionError(Exception):
+class ComplianceRegressionError(ComplianceCheckException):
     """Raised when compliance score drops below threshold."""
 
     def __init__(
         self,
         message: str,
         reason: ComplianceFailureReason = ComplianceFailureReason.REGRESSION_OVERALL,
-        exit_code: int = ExitCode.COMPLIANCE_REGRESSION,
     ):
-        self.message = message
-        self.reason = reason
-        self.exit_code = exit_code
-        super().__init__(self.message)
+        super().__init__(message, reason, ExitCode.COMPLIANCE_REGRESSION)
 
 
-class TestExecutionError(Exception):
+class TestExecutionError(ComplianceCheckException):
     """Raised when test execution fails."""
 
     def __init__(
         self,
         message: str,
         reason: ComplianceFailureReason = ComplianceFailureReason.TEST_EXECUTION_FAILED,
-        exit_code: int = ExitCode.TEST_FAILURE,
     ):
-        self.message = message
-        self.reason = reason
-        self.exit_code = exit_code
-        super().__init__(self.message)
+        super().__init__(message, reason, ExitCode.TEST_FAILURE)
 
 
-class MissingBaselineError(Exception):
+class MissingBaselineError(ComplianceCheckException):
     """Raised when baseline is missing for comparison."""
 
     def __init__(
         self,
         message: str,
         reason: ComplianceFailureReason = ComplianceFailureReason.BASELINE_NOT_FOUND,
-        exit_code: int = ExitCode.MISSING_BASELINE,
     ):
-        self.message = message
-        self.reason = reason
-        self.exit_code = exit_code
-        super().__init__(self.message)
+        super().__init__(message, reason, ExitCode.MISSING_BASELINE)
 
 
 @dataclass
