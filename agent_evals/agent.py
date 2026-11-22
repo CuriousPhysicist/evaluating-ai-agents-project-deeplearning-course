@@ -103,9 +103,22 @@ class OpenAIProvider:
         return self.client.chat.completions.create(**kwargs).choices[0].message
 
 
+# ========== Internal Helpers ==========
+
+
 def _complete(provider: ChatProvider, **kwargs: Any) -> Any:
+    """Tracing wrapper around provider.complete() for observability."""
     with trace.get_tracer("agent_evals").start_as_current_span("model_call"):
         return provider.complete(**kwargs)
+
+
+def _clean_fences(text: str, language: str) -> str:
+    """Remove code fences from the text for a given programming language."""
+    text = text.strip()
+    return re.sub(rf"^```(?:{language})?\s*|\s*```$", "", text, flags=re.IGNORECASE).strip()
+
+
+# ========== Models & Configuration ==========
 
 
 @dataclass
@@ -139,12 +152,11 @@ class ChartConfig(BaseModel):
     title: str
 
 
-def _clean_fences(text: str, language: str) -> str:
-    text = text.strip()
-    return re.sub(rf"^```(?:{language})?\s*|\s*```$", "", text, flags=re.IGNORECASE).strip()
+# ========== Utilities ==========
 
 
 def get_tool_definitions(settings: AgentSettings) -> list[dict[str, Any]]:
+    """Get the tool definitions for the agent, applying any overrides from the settings."""
     tools = json.loads(json.dumps(TOOL_DEFINITIONS))
     if settings.tool_descriptions:
         for tool in tools:
@@ -154,7 +166,10 @@ def get_tool_definitions(settings: AgentSettings) -> list[dict[str, Any]]:
     return tools
 
 
-# Skills / Tools block: these are the functions that the agent can call to perform specific tasks. Each function takes in a prompt and returns a string result. The agent will use these functions to look up data, analyze it, and generate visualizations based on user queries.
+# ========== Skills / Tools ==========
+# These are the functions that the agent can call to perform specific tasks.
+# Each function takes in a prompt and returns a string result. The agent will use
+# these functions to look up data, analyze it, and generate visualizations based on user queries.
 def lookup_sales_data(
     prompt: str,
     settings: AgentSettings,
@@ -165,6 +180,7 @@ def lookup_sales_data(
     sample_path = runtime_input_path(resolve_root(root), "data", "sample_sales.parquet")
     tracer = trace.get_tracer("agent_evals")
     try:
+        # Read the columns from the sample sales data to inform the SQL generation
         columns = ", ".join(pd.read_parquet(sample_path).columns)
         sql_prompt = f"{settings.sql_generation_prompt}\n{prompt}\nAvailable columns: {columns}\nTable: sales"
         response = _complete(
@@ -173,6 +189,7 @@ def lookup_sales_data(
             messages=[{"role": "user", "content": sql_prompt}],
         )
         sql = _clean_fences(response.content or "", "sql")
+        # Execute the generated SQL query against the sample sales data
         with tracer.start_as_current_span("execute_sql_query") as span:
             span.set_attribute(SpanAttributes.INPUT_VALUE, sql)
             frame = pd.read_parquet(sample_path)
