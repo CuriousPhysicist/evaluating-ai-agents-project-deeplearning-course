@@ -6,18 +6,59 @@ Extends the existing agent_evals CLI with compliance-related commands.
 from __future__ import annotations
 
 import json
+from functools import wraps
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 import click
 
 from agent_evals.compliance_reporter import generate_compliance_report, JSONReporter
 
 
+def handle_compliance_errors(func: Callable) -> Callable:
+    """Decorator to handle common compliance command errors."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except FileNotFoundError as e:
+            click.echo(f"Error: {e}", err=True)
+            raise click.Exit(1)
+        except Exception as e:
+            verbose = kwargs.get("verbose", False)
+            click.echo(f"Error: {e}", err=True)
+            if verbose:
+                raise
+            raise click.Exit(1)
+    return wrapper
+
+
 @click.group()
 def compliance():
     """Compliance reporting and analysis commands."""
     pass
+
+# Compliance report command group
+def _add_common_options(func):
+    """Add common options shared across compliance commands."""
+    func = click.option(
+        "--spec",
+        type=click.Path(exists=True, path_type=Path),
+        default="specifications/compliance/t1-t21-spec.yaml",
+        help="Path to requirements specification YAML file",
+    )(func)
+    func = click.option(
+        "--verbose",
+        "-v",
+        is_flag=True,
+        help="Verbose output",
+    )(func)
+    func = click.argument(
+        "results_file",
+        type=click.Path(exists=True, path_type=Path),
+        default=".compliance_results.json",
+    )(func)
+    return func
 
 
 @compliance.command(name="report")
@@ -51,6 +92,7 @@ def compliance():
     is_flag=True,
     help="Verbose output",
 )
+@handle_compliance_errors
 def report_command(
     results_file: Path,
     spec: Path,
@@ -76,38 +118,28 @@ def report_command(
         compliance-report myresults.json --spec specifications/compliance/t1-t21-spec.yaml \\
             --format html --output report.html --verbose
     """
-    try:
-        if verbose:
-            click.echo(f"Loading spec from: {spec}")
-            click.echo(f"Loading results from: {results_file}")
-        
-        # Generate report
-        report = generate_compliance_report(
-            spec_file=spec,
-            results_file=results_file,
-            format=format,
-            output_file=output,
-        )
-        
-        # Output
-        if output:
-            click.echo(f"Report written to: {output}", err=False)
-        else:
-            click.echo(report)
-        
-        if verbose:
-            click.echo("\nReport generation completed successfully")
-        
-    except FileNotFoundError as e:
-        click.echo(f"Error: {e}", err=True)
-        raise click.Exit(1)
-    except Exception as e:
-        click.echo(f"Error generating report: {e}", err=True)
-        if verbose:
-            raise
-        raise click.Exit(1)
+    if verbose:
+        click.echo(f"Loading spec from: {spec}")
+        click.echo(f"Loading results from: {results_file}")
+    
+    # Generate report
+    report = generate_compliance_report(
+        spec_file=spec,
+        results_file=results_file,
+        format=format,
+        output_file=output,
+    )
+    
+    # Output
+    if output:
+        click.echo(f"Report written to: {output}", err=False)
+    else:
+        click.echo(report)
+    
+    if verbose:
+        click.echo("\nReport generation completed successfully")
 
-
+# Compliance check command group
 @compliance.command(name="check")
 @click.argument(
     "results_file",
@@ -137,6 +169,7 @@ def report_command(
     is_flag=True,
     help="Verbose output",
 )
+@handle_compliance_errors
 def check_command(
     results_file: Path,
     spec: Path,
@@ -161,57 +194,47 @@ def check_command(
         # Percentage threshold
         compliance-check --threshold 85
     """
-    try:
-        # Normalize threshold (0-100 or 0.0-1.0)
-        if threshold > 1.0:
-            threshold = threshold / 100.0
-        
-        if verbose:
-            click.echo(f"Loading spec from: {spec}")
-            click.echo(f"Loading results from: {results_file}")
-            click.echo(f"Threshold: {threshold*100:.1f}%")
-        
-        # Load and calculate
-        reporter = JSONReporter(spec, results_file)
-        compliance = reporter.calculate_compliance()
-        
-        score = compliance.overall_score
-        score_pct = score * 100
-        threshold_pct = threshold * 100
-        
-        # Print report
-        click.echo("\n" + "=" * 60)
-        click.echo("COMPLIANCE CHECK")
-        click.echo("=" * 60)
-        click.echo(f"Score:     {score_pct:>6.2f}%")
-        click.echo(f"Threshold: {threshold_pct:>6.2f}%")
-        click.echo(f"Status:    ", nl=False)
-        
-        if score >= threshold:
-            click.echo(click.style("PASS", fg="green", bold=True))
-            exit_code = 0
-        else:
-            click.echo(click.style("FAIL", fg="red", bold=True))
-            exit_code = 1 if fail_if_below else 0
-        
-        click.echo("-" * 60)
-        click.echo(f"Passed:    {compliance.aggregate.get('total_pass', 0)}")
-        click.echo(f"Failed:    {compliance.aggregate.get('total_fail', 0)}")
-        click.echo(f"Skipped:   {compliance.aggregate.get('total_skip', 0)}")
-        click.echo("=" * 60 + "\n")
-        
-        raise click.Exit(exit_code)
-        
-    except FileNotFoundError as e:
-        click.echo(f"Error: {e}", err=True)
-        raise click.Exit(1)
-    except Exception as e:
-        click.echo(f"Error checking compliance: {e}", err=True)
-        if verbose:
-            raise
-        raise click.Exit(1)
+    # Normalize threshold (0-100 or 0.0-1.0)
+    if threshold > 1.0:
+        threshold = threshold / 100.0
+    
+    if verbose:
+        click.echo(f"Loading spec from: {spec}")
+        click.echo(f"Loading results from: {results_file}")
+        click.echo(f"Threshold: {threshold*100:.1f}%")
+    
+    # Load and calculate
+    reporter = JSONReporter(spec, results_file)
+    compliance = reporter.calculate_compliance()
+    
+    score = compliance.overall_score
+    score_pct = score * 100
+    threshold_pct = threshold * 100
+    
+    # Print report
+    click.echo("\n" + "=" * 60)
+    click.echo("COMPLIANCE CHECK")
+    click.echo("=" * 60)
+    click.echo(f"Score:     {score_pct:>6.2f}%")
+    click.echo(f"Threshold: {threshold_pct:>6.2f}%")
+    click.echo(f"Status:    ", nl=False)
+    
+    if score >= threshold:
+        click.echo(click.style("PASS", fg="green", bold=True))
+        exit_code = 0
+    else:
+        click.echo(click.style("FAIL", fg="red", bold=True))
+        exit_code = 1 if fail_if_below else 0
+    
+    click.echo("-" * 60)
+    click.echo(f"Passed:    {compliance.aggregate.get('total_pass', 0)}")
+    click.echo(f"Failed:    {compliance.aggregate.get('total_fail', 0)}")
+    click.echo(f"Skipped:   {compliance.aggregate.get('total_skip', 0)}")
+    click.echo("=" * 60 + "\n")
+    
+    raise click.Exit(exit_code)
 
-
+# Compliance summary command
 @compliance.command(name="summary")
 @click.argument(
     "results_file",
@@ -224,6 +247,7 @@ def check_command(
     default="specifications/compliance/t1-t21-spec.yaml",
     help="Path to requirements specification YAML file",
 )
+@handle_compliance_errors
 def summary_command(results_file: Path, spec: Path):
     """Display a quick summary of compliance status.
     
@@ -233,62 +257,54 @@ def summary_command(results_file: Path, spec: Path):
         compliance-summary
         compliance-summary my_results.json
     """
-    try:
-        reporter = JSONReporter(spec, results_file)
-        compliance = reporter.calculate_compliance()
-        
-        # Print summary
-        score_pct = compliance.overall_score * 100
-        
-        click.echo("\n" + "=" * 70)
-        click.echo("COMPLIANCE SUMMARY", bold=True)
-        click.echo("=" * 70)
-        
-        # Overall score
-        if score_pct >= 80:
-            color = "green"
-        elif score_pct >= 50:
-            color = "yellow"
-        else:
-            color = "red"
-        
-        click.echo(f"Overall Score: {click.style(f'{score_pct:.2f}%', fg=color, bold=True)}")
-        click.echo(f"Requirements:  {len(compliance.per_requirement)}")
-        click.echo(f"Total Tests:   {compliance.aggregate.get('total_pass', 0) + compliance.aggregate.get('total_fail', 0) + compliance.aggregate.get('total_skip', 0)}")
-        
-        click.echo("\n" + "-" * 70)
-        click.echo("Test Status:")
-        click.echo(f"  Passed:      {click.style(str(compliance.aggregate.get('total_pass', 0)), fg='green')}")
-        click.echo(f"  Failed:      {click.style(str(compliance.aggregate.get('total_fail', 0)), fg='red')}")
-        click.echo(f"  Skipped:     {click.style(str(compliance.aggregate.get('total_skip', 0)), fg='yellow')}")
-        
-        # Requirement breakdown
-        pass_count = sum(
-            1 for r in compliance.per_requirement.values() 
-            if r.get("score", 0) >= 1.0
-        )
-        partial_count = sum(
-            1 for r in compliance.per_requirement.values() 
-            if 0 < r.get("score", 0) < 1.0
-        )
-        fail_count = sum(
-            1 for r in compliance.per_requirement.values() 
-            if r.get("score", 0) == 0
-        )
-        
-        click.echo("\n" + "-" * 70)
-        click.echo("Requirement Status:")
-        click.echo(f"  Fully Met:   {click.style(str(pass_count), fg='green')} / {len(compliance.per_requirement)}")
-        click.echo(f"  Partial:     {click.style(str(partial_count), fg='yellow')} / {len(compliance.per_requirement)}")
-        click.echo(f"  Not Met:     {click.style(str(fail_count), fg='red')} / {len(compliance.per_requirement)}")
-        click.echo("=" * 70 + "\n")
-        
-    except FileNotFoundError as e:
-        click.echo(f"Error: {e}", err=True)
-        raise click.Exit(1)
-    except Exception as e:
-        click.echo(f"Error: {e}", err=True)
-        raise click.Exit(1)
+    reporter = JSONReporter(spec, results_file)
+    compliance = reporter.calculate_compliance()
+    
+    # Print summary
+    score_pct = compliance.overall_score * 100
+    
+    click.echo("\n" + "=" * 70)
+    click.echo("COMPLIANCE SUMMARY", bold=True)
+    click.echo("=" * 70)
+    
+    # Overall score
+    if score_pct >= 80:
+        color = "green"
+    elif score_pct >= 50:
+        color = "yellow"
+    else:
+        color = "red"
+    
+    click.echo(f"Overall Score: {click.style(f'{score_pct:.2f}%', fg=color, bold=True)}")
+    click.echo(f"Requirements:  {len(compliance.per_requirement)}")
+    click.echo(f"Total Tests:   {compliance.aggregate.get('total_pass', 0) + compliance.aggregate.get('total_fail', 0) + compliance.aggregate.get('total_skip', 0)}")
+    
+    click.echo("\n" + "-" * 70)
+    click.echo("Test Status:")
+    click.echo(f"  Passed:      {click.style(str(compliance.aggregate.get('total_pass', 0)), fg='green')}")
+    click.echo(f"  Failed:      {click.style(str(compliance.aggregate.get('total_fail', 0)), fg='red')}")
+    click.echo(f"  Skipped:     {click.style(str(compliance.aggregate.get('total_skip', 0)), fg='yellow')}")
+    
+    # Requirement breakdown
+    pass_count = sum(
+        1 for r in compliance.per_requirement.values() 
+        if r.get("score", 0) >= 1.0
+    )
+    partial_count = sum(
+        1 for r in compliance.per_requirement.values() 
+        if 0 < r.get("score", 0) < 1.0
+    )
+    fail_count = sum(
+        1 for r in compliance.per_requirement.values() 
+        if r.get("score", 0) == 0
+    )
+    
+    click.echo("\n" + "-" * 70)
+    click.echo("Requirement Status:")
+    click.echo(f"  Fully Met:   {click.style(str(pass_count), fg='green')} / {len(compliance.per_requirement)}")
+    click.echo(f"  Partial:     {click.style(str(partial_count), fg='yellow')} / {len(compliance.per_requirement)}")
+    click.echo(f"  Not Met:     {click.style(str(fail_count), fg='red')} / {len(compliance.per_requirement)}")
+    click.echo("=" * 70 + "\n")
 
 
 # Integration point for existing CLI
